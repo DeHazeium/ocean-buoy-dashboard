@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ocean Buoy Monitoring Station</title>
+    <title>Ocean Buoy Monitoring</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -15,120 +15,61 @@
         }
         
         :root {
-            --cyan: #00fff9;
-            --cyan-glow: rgba(0, 255, 249, 0.5);
-            --purple: #bd00ff;
-            --purple-glow: rgba(189, 0, 255, 0.5);
-            --pink: #ff006e;
-            --blue: #0066ff;
-            --dark: #0a0e27;
-            --darker: #050614;
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --border: #2a2a2a;
+            --border-hover: #3a3a3a;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --accent: #ffffff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
         }
         
         body {
-            font-family: 'Rajdhani', sans-serif;
-            background: var(--darker);
-            color: #ffffff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         
-        /* Animated background grid */
-        .bg-grid {
+        /* Subtle noise texture */
+        body::before {
+            content: '';
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
-                linear-gradient(var(--cyan) 1px, transparent 1px),
-                linear-gradient(90deg, var(--cyan) 1px, transparent 1px);
-            background-size: 50px 50px;
             opacity: 0.03;
-            animation: gridScroll 20s linear infinite;
             pointer-events: none;
-            z-index: 1;
-        }
-        
-        @keyframes gridScroll {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(50px); }
-        }
-        
-        /* Glow orbs in background */
-        .bg-orb {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.15;
-            pointer-events: none;
-            z-index: 0;
-            animation: float 8s ease-in-out infinite;
-        }
-        
-        .orb-1 {
-            width: 400px;
-            height: 400px;
-            background: var(--cyan);
-            top: -100px;
-            left: -100px;
-            animation-delay: 0s;
-        }
-        
-        .orb-2 {
-            width: 300px;
-            height: 300px;
-            background: var(--purple);
-            bottom: -50px;
-            right: -50px;
-            animation-delay: -4s;
-        }
-        
-        .orb-3 {
-            width: 350px;
-            height: 350px;
-            background: var(--pink);
-            top: 30%;
-            right: 10%;
-            animation-delay: -2s;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -30px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
         
         .container {
-            position: relative;
-            z-index: 10;
-            max-width: 1800px;
+            max-width: 1600px;
             margin: 0 auto;
-            padding: 40px 30px;
+            padding: 60px 40px;
         }
         
         /* Header */
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 50px;
-            padding: 30px;
-            background: rgba(10, 14, 39, 0.6);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 255, 249, 0.2);
-            border-radius: 2px;
-            box-shadow: 
-                0 0 30px rgba(0, 255, 249, 0.1),
-                inset 0 0 20px rgba(0, 255, 249, 0.05);
-            animation: slideDown 0.8s ease-out;
+            margin-bottom: 60px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid var(--border);
+            animation: fadeIn 0.6s ease-out;
         }
         
-        @keyframes slideDown {
+        @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(-30px);
+                transform: translateY(-10px);
             }
             to {
                 opacity: 1;
@@ -136,102 +77,135 @@
             }
         }
         
-        .header-left h1 {
-            font-family: 'Orbitron', monospace;
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .header-title h1 {
             font-size: 2.5em;
-            font-weight: 900;
-            letter-spacing: 3px;
-            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff 0%, #888888 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            text-shadow: 0 0 30px var(--cyan-glow);
         }
         
-        .header-left .subtitle {
-            font-size: 1em;
-            color: var(--cyan);
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            font-weight: 300;
+        .header-subtitle {
+            font-size: 0.95em;
+            color: var(--text-secondary);
+            font-weight: 500;
+            letter-spacing: 0.3px;
         }
         
-        .header-right {
-            text-align: right;
-        }
-        
-        .status-pill {
-            display: inline-flex;
+        .status-container {
+            display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 12px 24px;
-            background: rgba(0, 255, 249, 0.1);
-            border: 1px solid var(--cyan);
-            border-radius: 50px;
-            font-family: 'Orbitron', monospace;
-            font-size: 0.85em;
-            font-weight: 600;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            box-shadow: 0 0 20px var(--cyan-glow);
-            animation: pulse 2s ease-in-out infinite;
+            gap: 12px;
+            padding: 12px 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
         
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 20px var(--cyan-glow); }
-            50% { box-shadow: 0 0 30px var(--cyan-glow), 0 0 40px var(--cyan-glow); }
+        .status-container:hover {
+            border-color: var(--border-hover);
+            background: var(--bg-tertiary);
         }
         
-        .status-dot {
+        .status-indicator {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: var(--cyan);
-            box-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan);
-            animation: blink 1s ease-in-out infinite;
+            background: var(--text-muted);
+            position: relative;
+            transition: all 0.3s ease;
         }
         
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+        .status-indicator.active {
+            background: var(--success);
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: statusPulse 2s infinite;
         }
         
-        .last-sync {
-            margin-top: 8px;
-            font-size: 0.75em;
-            color: rgba(255, 255, 255, 0.5);
-            letter-spacing: 1px;
+        @keyframes statusPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
         }
         
-        /* Data Grid */
-        .data-grid {
+        .status-text {
+            font-size: 0.85em;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .header-meta {
+            display: flex;
+            gap: 40px;
+            font-size: 0.85em;
+            color: var(--text-muted);
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .meta-label {
+            font-weight: 500;
+        }
+        
+        .meta-value {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-secondary);
+        }
+        
+        /* Main Grid */
+        .main-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
         }
         
-        .data-card {
-            background: rgba(10, 14, 39, 0.5);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 255, 249, 0.3);
-            padding: 30px;
+        /* Primary Stats */
+        .stats-primary {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
-            transition: all 0.3s ease;
-            animation: fadeIn 0.6s ease-out backwards;
+            animation: slideUp 0.6s ease-out backwards;
         }
         
-        .data-card:nth-child(1) { animation-delay: 0.1s; }
-        .data-card:nth-child(2) { animation-delay: 0.2s; }
-        .data-card:nth-child(3) { animation-delay: 0.3s; }
-        .data-card:nth-child(4) { animation-delay: 0.4s; }
-        .data-card:nth-child(5) { animation-delay: 0.5s; }
-        .data-card:nth-child(6) { animation-delay: 0.6s; }
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.15s; }
+        .stat-card:nth-child(3) { animation-delay: 0.2s; }
+        .stat-card:nth-child(4) { animation-delay: 0.25s; }
         
-        @keyframes fadeIn {
+        @keyframes slideUp {
             from {
                 opacity: 0;
                 transform: translateY(20px);
@@ -242,400 +216,471 @@
             }
         }
         
-        .data-card::before {
+        .stat-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
             opacity: 0;
             transition: opacity 0.3s ease;
         }
         
-        .data-card:hover {
-            border-color: var(--cyan);
-            box-shadow: 0 0 30px var(--cyan-glow);
-            transform: translateY(-5px);
+        .stat-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
         }
         
-        .data-card:hover::before {
-            opacity: 1;
-        }
-        
-        .card-label {
-            font-family: 'Orbitron', monospace;
-            font-size: 0.7em;
-            color: rgba(0, 255, 249, 0.7);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-        
-        .card-value {
-            font-size: 2.5em;
-            font-weight: 700;
-            color: #ffffff;
-            letter-spacing: -1px;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-            font-family: 'Orbitron', monospace;
-            margin-bottom: 10px;
-            line-height: 1;
-        }
-        
-        .card-value.highlight {
-            background: linear-gradient(135deg, var(--cyan), var(--purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .card-subtext {
-            font-size: 0.85em;
-            color: rgba(255, 255, 255, 0.5);
-            letter-spacing: 1px;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 6px 14px;
-            border-radius: 3px;
-            font-size: 0.7em;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            font-family: 'Orbitron', monospace;
-        }
-        
-        .status-badge.online {
-            background: rgba(0, 255, 0, 0.2);
-            color: #00ff00;
-            border: 1px solid #00ff00;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
-        }
-        
-        .status-badge.warning {
-            background: rgba(255, 170, 0, 0.2);
-            color: #ffaa00;
-            border: 1px solid #ffaa00;
-            box-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
-        }
-        
-        .status-badge.error {
-            background: rgba(255, 0, 0, 0.2);
-            color: #ff0000;
-            border: 1px solid #ff0000;
-            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
-        }
-        
-        /* Large Stats Section */
-        .stats-hero {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-        
-        .stat-box {
-            background: linear-gradient(135deg, rgba(0, 255, 249, 0.1), rgba(189, 0, 255, 0.1));
-            border: 2px solid transparent;
-            background-clip: padding-box;
-            padding: 40px 30px;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .stat-box::before {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            background: linear-gradient(135deg, var(--cyan), var(--purple));
-            z-index: -1;
-            opacity: 0.5;
-        }
-        
-        .stat-box:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 40px rgba(0, 255, 249, 0.3);
+        .stat-card:hover::before {
+            opacity: 0.3;
         }
         
         .stat-label {
-            font-family: 'Orbitron', monospace;
-            font-size: 0.75em;
-            color: var(--cyan);
-            letter-spacing: 3px;
+            font-size: 0.8em;
+            font-weight: 600;
+            color: var(--text-muted);
             text-transform: uppercase;
-            margin-bottom: 12px;
+            letter-spacing: 1.5px;
+            margin-bottom: 16px;
         }
         
         .stat-value {
-            font-size: 3em;
-            font-weight: 900;
-            font-family: 'Orbitron', monospace;
-            background: linear-gradient(135deg, #ffffff, var(--cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 2.8em;
+            font-weight: 700;
+            letter-spacing: -1.5px;
             line-height: 1;
+            margin-bottom: 12px;
+            font-family: 'JetBrains Mono', monospace;
         }
         
-        /* Coordinates Display */
-        .coordinates-panel {
-            background: rgba(10, 14, 39, 0.7);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(189, 0, 255, 0.3);
-            padding: 40px;
-            margin-bottom: 40px;
+        .stat-unit {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .stat-change {
+            font-size: 0.8em;
+            color: var(--success);
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        
+        /* Status Panel */
+        .status-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            animation: slideUp 0.6s ease-out 0.1s backwards;
+        }
+        
+        .panel-title {
+            font-size: 0.8em;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .status-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .status-label {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .status-value {
+            font-size: 1em;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -0.3px;
+        }
+        
+        .badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75em;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .badge.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        .badge.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+        
+        .badge.danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        
+        .badge.neutral {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+        
+        /* Secondary Grid */
+        .secondary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .data-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            transition: all 0.3s ease;
+            animation: slideUp 0.6s ease-out backwards;
+        }
+        
+        .data-card:nth-child(1) { animation-delay: 0.3s; }
+        .data-card:nth-child(2) { animation-delay: 0.35s; }
+        .data-card:nth-child(3) { animation-delay: 0.4s; }
+        
+        .data-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+        
+        .data-label {
+            font-size: 0.8em;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+        }
+        
+        .data-value {
+            font-size: 2em;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .data-subtext {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+        
+        /* Location Card */
+        .location-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            margin-top: 30px;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 40px;
-            position: relative;
-            overflow: hidden;
+            animation: slideUp 0.6s ease-out 0.45s backwards;
         }
         
-        .coordinates-panel::after {
+        .location-item {
+            position: relative;
+        }
+        
+        .location-item::before {
             content: '';
             position: absolute;
+            left: -20px;
             top: 50%;
-            left: 50%;
-            width: 1px;
-            height: 60%;
-            background: linear-gradient(to bottom, transparent, var(--purple), transparent);
-            transform: translate(-50%, -50%);
+            transform: translateY(-50%);
+            width: 3px;
+            height: 40px;
+            background: linear-gradient(to bottom, transparent, var(--accent), transparent);
+            opacity: 0.5;
         }
         
-        .coord-item {
-            text-align: center;
-        }
-        
-        .coord-label {
-            font-family: 'Orbitron', monospace;
-            font-size: 0.8em;
-            color: var(--purple);
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            margin-bottom: 15px;
+        .location-label {
+            font-size: 0.75em;
             font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
         }
         
-        .coord-value {
-            font-size: 2em;
+        .location-value {
+            font-size: 1.8em;
             font-weight: 700;
-            font-family: 'Orbitron', monospace;
-            color: #ffffff;
-            letter-spacing: 2px;
-            text-shadow: 0 0 20px var(--purple-glow);
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -0.5px;
+            color: var(--text-primary);
         }
         
         /* Footer */
         .footer {
-            text-align: center;
-            padding: 30px;
             margin-top: 60px;
-            border-top: 1px solid rgba(0, 255, 249, 0.2);
+            padding-top: 30px;
+            border-top: 1px solid var(--border);
+            text-align: center;
             font-size: 0.8em;
-            color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 2px;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
         }
         
-        /* Loading */
-        .loading-screen {
+        .footer-refresh {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .refresh-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: blink 2s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        /* Loading State */
+        .loading-overlay {
             position: fixed;
             inset: 0;
-            background: var(--darker);
+            background: var(--bg-primary);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
+            transition: opacity 0.5s ease;
         }
         
-        .loading-screen.hidden {
+        .loading-overlay.hidden {
             opacity: 0;
-            visibility: hidden;
-        }
-        
-        .loading-content {
-            text-align: center;
+            pointer-events: none;
         }
         
         .loading-spinner {
-            width: 80px;
-            height: 80px;
-            border: 3px solid rgba(0, 255, 249, 0.1);
-            border-top-color: var(--cyan);
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 30px;
-            box-shadow: 0 0 30px var(--cyan-glow);
+            animation: spin 0.8s linear infinite;
         }
         
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
         
-        .loading-text {
-            font-family: 'Orbitron', monospace;
-            font-size: 1.2em;
-            color: var(--cyan);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-        }
-        
         /* Responsive */
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 20px;
-            }
-            
-            .header-left h1 {
-                font-size: 1.8em;
-            }
-            
-            .data-grid {
+        @media (max-width: 1200px) {
+            .main-grid {
                 grid-template-columns: 1fr;
             }
             
-            .coordinates-panel {
+            .stats-primary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .header-top {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .header-title h1 {
+                font-size: 2em;
+            }
+            
+            .header-meta {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .stats-primary {
+                grid-template-columns: 1fr;
+            }
+            
+            .secondary-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .location-card {
                 grid-template-columns: 1fr;
                 gap: 30px;
             }
             
-            .coordinates-panel::after {
-                width: 60%;
-                height: 1px;
-                top: 50%;
-                left: 50%;
+            .stat-value {
+                font-size: 2.2em;
             }
-        }
-        
-        /* Scanline effect */
-        @keyframes scanline {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100vh); }
-        }
-        
-        .scanline {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(to bottom, transparent, var(--cyan), transparent);
-            opacity: 0.1;
-            animation: scanline 8s linear infinite;
-            pointer-events: none;
-            z-index: 100;
         }
     </style>
 </head>
 <body>
-    <!-- Background effects -->
-    <div class="bg-grid"></div>
-    <div class="bg-orb orb-1"></div>
-    <div class="bg-orb orb-2"></div>
-    <div class="bg-orb orb-3"></div>
-    <div class="scanline"></div>
-    
-    <!-- Loading screen -->
-    <div class="loading-screen" id="loadingScreen">
-        <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <div class="loading-text">Initializing Connection</div>
-        </div>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
     </div>
     
     <div class="container">
         <!-- Header -->
-        <div class="header">
-            <div class="header-left">
-                <h1>🌊 OCEAN SENTINEL</h1>
-                <div class="subtitle">Deep Sea Monitoring System</div>
-            </div>
-            <div class="header-right">
-                <div class="status-pill">
-                    <div class="status-dot"></div>
-                    <span id="connectionStatus">CONNECTING</span>
+        <header class="header">
+            <div class="header-top">
+                <div class="header-title">
+                    <h1>Ocean Buoy Monitoring</h1>
+                    <div class="header-subtitle">Real-time environmental data tracking</div>
                 </div>
-                <div class="last-sync">LAST SYNC: <span id="lastSync">--:--:--</span></div>
+                <div class="status-container">
+                    <div class="status-indicator" id="statusIndicator"></div>
+                    <span class="status-text" id="connectionText">CONNECTING</span>
+                </div>
+            </div>
+            <div class="header-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Channel ID:</span>
+                    <span class="meta-value">3203006</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Last Update:</span>
+                    <span class="meta-value" id="lastUpdate">--:--:--</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Refresh Rate:</span>
+                    <span class="meta-value">20s</span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Primary Stats -->
+            <div class="stats-primary">
+                <div class="stat-card">
+                    <div class="stat-label">Event Counter</div>
+                    <div class="stat-value" id="eventCounter">--</div>
+                    <div class="stat-unit">Total detections</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Signal Strength</div>
+                    <div class="stat-value" id="rssiValue">--</div>
+                    <div class="stat-unit">dBm</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Magnitude</div>
+                    <div class="stat-value" id="magnitudeValue">--</div>
+                    <div class="stat-unit">Measurement</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Last Event</div>
+                    <div class="stat-value" id="lastEvent">--</div>
+                    <div class="stat-unit">Event type</div>
+                </div>
+            </div>
+            
+            <!-- Status Panel -->
+            <div class="status-panel">
+                <div class="panel-title">System Overview</div>
+                <div class="status-item">
+                    <span class="status-label">Operational Status</span>
+                    <span class="status-value" id="operationalStatus">
+                        <span class="badge neutral">UNKNOWN</span>
+                    </span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">GPS Lock</span>
+                    <span class="status-value" id="gpsLock">
+                        <span class="badge neutral">CHECKING</span>
+                    </span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Data Quality</span>
+                    <span class="status-value">
+                        <span class="badge success">EXCELLENT</span>
+                    </span>
+                </div>
             </div>
         </div>
         
-        <!-- Hero Stats -->
-        <div class="stats-hero">
-            <div class="stat-box">
-                <div class="stat-label">System Status</div>
-                <div class="stat-value" id="heroStatus">--</div>
+        <!-- Secondary Grid -->
+        <div class="secondary-grid">
+            <div class="data-card">
+                <div class="data-label">Buoy Status</div>
+                <div class="data-value" id="buoyStatus">--</div>
+                <div class="data-subtext">Current operational mode</div>
             </div>
-            <div class="stat-box">
-                <div class="stat-label">Events Detected</div>
-                <div class="stat-value" id="heroCount">0</div>
+            
+            <div class="data-card">
+                <div class="data-label">GPS Satellites</div>
+                <div class="data-value" id="gpsValid">--</div>
+                <div class="data-subtext">Position validity</div>
             </div>
-            <div class="stat-box">
-                <div class="stat-label">Signal Strength</div>
-                <div class="stat-value" id="heroRSSI">--</div>
+            
+            <div class="data-card">
+                <div class="data-label">Network Status</div>
+                <div class="data-value" id="networkStatus">ACTIVE</div>
+                <div class="data-subtext">Connection quality</div>
             </div>
         </div>
         
-        <!-- Coordinates -->
-        <div class="coordinates-panel">
-            <div class="coord-item">
-                <div class="coord-label">◈ Latitude</div>
-                <div class="coord-value" id="latValue">--°</div>
+        <!-- Location Card -->
+        <div class="location-card">
+            <div class="location-item">
+                <div class="location-label">◆ Latitude</div>
+                <div class="location-value" id="latitudeValue">--°</div>
             </div>
-            <div class="coord-item">
-                <div class="coord-label">◈ Longitude</div>
-                <div class="coord-value" id="lonValue">--°</div>
-            </div>
-        </div>
-        
-        <!-- Data Cards -->
-        <div class="data-grid">
-            <div class="data-card">
-                <div class="card-label">▸ Buoy Status</div>
-                <div class="card-value" id="statusValue">--</div>
-                <div class="card-subtext">Operational Mode</div>
-            </div>
-            
-            <div class="data-card">
-                <div class="card-label">▸ Last Event Type</div>
-                <div class="card-value highlight" id="eventValue">--</div>
-                <div class="card-subtext">Recent Detection</div>
-            </div>
-            
-            <div class="data-card">
-                <div class="card-label">▸ Magnitude</div>
-                <div class="card-value" id="magnitudeValue">--</div>
-                <div class="card-subtext">Measurement Unit</div>
-            </div>
-            
-            <div class="data-card">
-                <div class="card-label">▸ GPS Validity</div>
-                <div class="card-value" id="gpsValidValue">--</div>
-                <div class="card-subtext">Position Lock</div>
-            </div>
-            
-            <div class="data-card">
-                <div class="card-label">▸ RSSI Signal</div>
-                <div class="card-value" id="rssiValue">--</div>
-                <div class="card-subtext">Network Quality</div>
-            </div>
-            
-            <div class="data-card">
-                <div class="card-label">▸ Event Counter</div>
-                <div class="card-value highlight" id="countValue">0</div>
-                <div class="card-subtext">Total Detections</div>
+            <div class="location-item">
+                <div class="location-label">◆ Longitude</div>
+                <div class="location-value" id="longitudeValue">--°</div>
             </div>
         </div>
         
-        <div class="footer">
-            AUTO-REFRESH ENABLED • THINGSPEAK API • 20 SECOND INTERVAL
-        </div>
+        <!-- Footer -->
+        <footer class="footer">
+            <div>Powered by ThingSpeak API</div>
+            <div class="footer-refresh">
+                <div class="refresh-dot"></div>
+                <span>Auto-refresh enabled</span>
+            </div>
+        </footer>
     </div>
 
     <script>
@@ -643,7 +688,7 @@
         const READ_API_KEY = "JN2TR7S7XJLS9TWW";
         const REFRESH_MS = 20000;
         
-        let isFirstLoad = true;
+        let firstLoad = true;
 
         async function fetchData() {
             const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json?api_key=${READ_API_KEY}`;
@@ -652,23 +697,24 @@
                 const res = await fetch(url);
                 
                 if (!res.ok) {
-                    throw new Error('Network response was not ok');
+                    throw new Error('Network error');
                 }
                 
                 const data = await res.json();
                 
-                // Hide loading screen on first successful load
-                if (isFirstLoad) {
+                // Hide loading overlay on first load
+                if (firstLoad) {
                     setTimeout(() => {
-                        document.getElementById('loadingScreen').classList.add('hidden');
-                    }, 1000);
-                    isFirstLoad = false;
+                        document.getElementById('loadingOverlay').classList.add('hidden');
+                    }, 800);
+                    firstLoad = false;
                 }
                 
                 // Update connection status
-                document.getElementById('connectionStatus').textContent = 'ONLINE';
-
-                // Parse data
+                document.getElementById('statusIndicator').classList.add('active');
+                document.getElementById('connectionText').textContent = 'CONNECTED';
+                
+                // Parse fields
                 const eventType = data.field1 || 'NONE';
                 const magnitude = data.field2 || '--';
                 const lat = data.field3;
@@ -677,32 +723,51 @@
                 const gpsValid = data.field6;
                 const count = data.field7 || '0';
                 const status = data.field8 || 'UNKNOWN';
-
-                // Update hero stats
-                document.getElementById('heroStatus').textContent = status;
-                document.getElementById('heroCount').textContent = count;
-                document.getElementById('heroRSSI').textContent = rssi ? rssi + ' dBm' : '--';
-
-                // Update coordinates
-                document.getElementById('latValue').textContent = lat ? parseFloat(lat).toFixed(6) + '°' : 'NO FIX';
-                document.getElementById('lonValue').textContent = lon ? parseFloat(lon).toFixed(6) + '°' : 'NO FIX';
-
-                // Update data cards
-                document.getElementById('statusValue').textContent = status;
-                document.getElementById('eventValue').textContent = eventType;
+                
+                // Update primary stats
+                document.getElementById('eventCounter').textContent = count;
+                document.getElementById('rssiValue').textContent = rssi || '--';
                 document.getElementById('magnitudeValue').textContent = magnitude;
-                document.getElementById('gpsValidValue').textContent = gpsValid === '1' ? 'VALID' : 'INVALID';
-                document.getElementById('rssiValue').textContent = rssi ? rssi + ' dBm' : '--';
-                document.getElementById('countValue').textContent = count;
-
+                document.getElementById('lastEvent').textContent = eventType;
+                
+                // Update status panel
+                const operationalStatusEl = document.getElementById('operationalStatus');
+                let statusBadge = '';
+                if (status === 'DEPLOYED' || status === 'ONLINE') {
+                    statusBadge = `<span class="badge success">${status}</span>`;
+                } else if (status.includes('GPS') || status.includes('CALIB')) {
+                    statusBadge = `<span class="badge warning">${status}</span>`;
+                } else {
+                    statusBadge = `<span class="badge danger">${status}</span>`;
+                }
+                operationalStatusEl.innerHTML = statusBadge;
+                
+                const gpsLockEl = document.getElementById('gpsLock');
+                if (gpsValid === '1') {
+                    gpsLockEl.innerHTML = '<span class="badge success">LOCKED</span>';
+                } else {
+                    gpsLockEl.innerHTML = '<span class="badge danger">NO LOCK</span>';
+                }
+                
+                // Update secondary cards
+                document.getElementById('buoyStatus').textContent = status;
+                document.getElementById('gpsValid').textContent = gpsValid === '1' ? 'VALID' : 'INVALID';
+                
+                // Update location
+                document.getElementById('latitudeValue').textContent = 
+                    lat ? parseFloat(lat).toFixed(6) + '°' : 'NO DATA';
+                document.getElementById('longitudeValue').textContent = 
+                    lon ? parseFloat(lon).toFixed(6) + '°' : 'NO DATA';
+                
                 // Update timestamp
                 const now = new Date();
-                document.getElementById('lastSync').textContent = 
+                document.getElementById('lastUpdate').textContent = 
                     now.toLocaleTimeString('en-US', { hour12: false });
-
+                
             } catch (e) {
-                console.error("ThingSpeak error", e);
-                document.getElementById('connectionStatus').textContent = 'ERROR';
+                console.error("Error fetching data:", e);
+                document.getElementById('statusIndicator').classList.remove('active');
+                document.getElementById('connectionText').textContent = 'ERROR';
             }
         }
 
