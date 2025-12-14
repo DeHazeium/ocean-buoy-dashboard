@@ -1,209 +1,482 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ESP32 Buoy Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<style>
-/* --- Styles from your modern dashboard --- */
-* { margin:0;padding:0;box-sizing:border-box; }
-body { font-family: 'Montserrat', sans-serif; background:#000; color:#fff; min-height:100vh; padding:40px 20px; line-height:1.6; }
-.container { max-width:1600px; margin:0 auto; }
-.header { display:flex; justify-content:space-between; align-items:center; margin-bottom:60px; padding-bottom:30px; border-bottom:1px solid #222; }
-.header-title { display:flex; align-items:baseline; gap:16px; }
-.header h1 { font-size:2em; font-weight:700; text-transform:uppercase; letter-spacing:-1px; }
-.header-credit { font-size:0.75em; font-weight:500; color:#666; text-transform:lowercase; letter-spacing:1px; }
-.status-indicator { display:flex; align-items:center; gap:12px; font-size:0.8em; font-weight:600; text-transform:uppercase; letter-spacing:1px; }
-.status-dot { width:10px;height:10px;border-radius:50%;background:#444;position:relative; }
-.status-dot.connected { background:#0ff; box-shadow:0 0 10px #0ff; }
-.dashboard { transition:all 0.5s ease; opacity:0; transform:translateY(20px); }
-.dashboard.visible { opacity:1; transform:translateY(0); }
-.gps-status-banner { background:#0a0a0a; border:1px solid #333; border-left:4px solid #ffcc00; padding:24px; margin-bottom:40px; display:none; align-items:center; gap:20px; animation:slideDown 0.5s ease; }
-.gps-status-banner.active { display:flex; }
-.gps-status-banner.monitoring { border-left-color:#0ff; }
-@keyframes slideDown { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
-.card { background:#0a0a0a; border:1px solid #222; border-radius:0; padding:32px; transition:all 0.3s ease; position:relative; }
-.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(350px,1fr)); gap:24px; margin-bottom:40px; }
-.card-header { margin-bottom:32px; padding-bottom:20px; border-bottom:1px solid #1a1a1a; }
-.card-title { font-size:0.75em; font-weight:700; color:#fff; letter-spacing:2px; text-transform:uppercase; }
-.data-grid { display:grid; gap:24px; }
-.data-item { display:flex; justify-content:space-between; align-items:baseline; gap:16px; }
-.data-label { font-size:0.75em; color:#666; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; }
-.data-value { font-size:1.25em; font-weight:600; color:#fff; font-variant-numeric:tabular-nums; letter-spacing:-0.5px; }
-.data-value.invalid { color:#333; font-style:italic; font-weight:400; }
-.data-value.drift-warning { color:#ffcc00; }
-.data-value.drift-danger { color:#ff3333; }
-.section-title { font-size:0.75em; font-weight:700; color:#666; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; }
-.clear-events-btn { background:transparent; color:#666; border:1px solid #333; padding:8px 20px; font-size:0.75em; transition:all 0.3s ease; }
-.clear-events-btn:hover:not(:disabled) { background:#ff3333; color:#fff; border-color:#ff3333; }
-.event-list { display:grid; gap:16px; }
-.event-item { background:#0a0a0a; border:1px solid #222; padding:24px; transition:all 0.3s ease; animation:slideIn 0.5s ease; }
-@keyframes slideIn { from {opacity:0; transform:translateX(-20px);} to {opacity:1; transform:translateX(0);} }
-.event-item.impact { border-left:3px solid #0ff; }
-.event-item.drift { border-left:3px solid #ffcc00; }
-.event-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
-.event-type { font-size:0.85em; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; }
-.event-time { font-size:0.75em; color:#666; font-family:'Courier New',monospace; }
-.event-detail { color:#888; }
-.event-detail strong { color:#fff; }
-.empty-state { text-align:center; padding:60px 20px; color:#444; }
-.empty-state-text { font-size:0.85em; text-transform:uppercase; letter-spacing:1px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocean Buoy Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 60px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #222222;
+        }
+        
+        .header-title {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+        }
+        
+        .header-credit {
+            font-size: 0.75em;
+            font-weight: 500;
+            color: #666666;
+            letter-spacing: 1px;
+            text-transform: lowercase;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #444444;
+            position: relative;
+        }
+        
+        .status-dot::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 1px solid #444444;
+            opacity: 0;
+        }
+        
+        .status-dot.connected {
+            background: #ffffff;
+            box-shadow: 0 0 20px rgba(255,255,255,0.5);
+        }
+        
+        .status-dot.connected::after {
+            border-color: #ffffff;
+            opacity: 0.3;
+            animation: ripple 2s infinite;
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+        
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .sensor-module {
+            background: #0a0a0a;
+            border: 1px solid #222222;
+            border-radius: 0;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sensor-module::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #ffffff, transparent);
+            opacity: 0.1;
+        }
+        
+        .module-title {
+            font-size: 0.7em;
+            font-weight: 700;
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+        
+        .sensor-readings {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .reading-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 15px 0;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        
+        .reading-item:last-child {
+            border-bottom: none;
+        }
+        
+        .reading-label {
+            font-size: 0.75em;
+            font-weight: 600;
+            color: #999999;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        
+        .reading-value {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+        }
+        
+        .reading-value.invalid {
+            color: #555555;
+        }
+        
+        .reading-value.status-ok {
+            color: #00ff00;
+        }
+        
+        .reading-value.status-warn {
+            color: #ffaa00;
+        }
+        
+        .reading-value.status-danger {
+            color: #ff3333;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 0;
+            font-size: 0.7em;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        
+        .status-badge.deployed {
+            background: #001a00;
+            border-color: #00ff00;
+            color: #00ff00;
+        }
+        
+        .status-badge.warning {
+            background: #1a1000;
+            border-color: #ffaa00;
+            color: #ffaa00;
+        }
+        
+        .status-badge.error {
+            background: #1a0000;
+            border-color: #ff3333;
+            color: #ff3333;
+        }
+        
+        .event-history {
+            background: #0a0a0a;
+            border: 1px solid #222222;
+            border-radius: 0;
+            padding: 30px;
+            margin-top: 40px;
+        }
+        
+        .history-header {
+            font-size: 0.7em;
+            font-weight: 700;
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        
+        .event-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        
+        .event-item:last-child {
+            border-bottom: none;
+        }
+        
+        .event-type {
+            font-size: 0.85em;
+            font-weight: 700;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .event-magnitude {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #999999;
+        }
+        
+        .last-update {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #222222;
+            font-size: 0.75em;
+            color: #666666;
+            letter-spacing: 1px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 0.9em;
+            color: #666666;
+            letter-spacing: 1px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 15px;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .sensor-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <div class="header-title">
-            <h1>ESP32 BUOY MONITOR</h1>
-            <span class="header-credit">by Irfan</span>
-        </div>
-        <div class="status-indicator">
-            <div class="status-dot" id="statusDot"></div>
-            <span id="statusText">DISCONNECTED</span>
-        </div>
-    </div>
-
-    <div class="dashboard visible">
-        <!-- GPS Status Banner -->
-        <div class="gps-status-banner" id="gpsStatusBanner">
-            <div class="gps-status-content">
-                <div class="gps-status-title" id="gpsStatusTitle">GPS STATUS</div>
-                <div class="gps-status-message" id="gpsStatusMessage">Initializing...</div>
+    <div class="container">
+        <div class="header">
+            <div class="header-title">
+                <h1>🌊 Ocean Buoy</h1>
+                <span class="header-credit">thingspeak live</span>
+            </div>
+            <div class="status-indicator">
+                <div class="status-dot" id="connectionDot"></div>
+                <span id="connectionStatus">CONNECTING...</span>
             </div>
         </div>
 
-        <div class="section-title">Live Sensor Data</div>
-        <div class="grid">
-            <div class="card">
-                <div class="card-header"><div class="card-title">Sensor Data</div></div>
-                <div class="data-grid">
-                    <div class="data-item"><span class="data-label">Event Type</span><span class="data-value" id="eventType">--</span></div>
-                    <div class="data-item"><span class="data-label">Magnitude</span><span class="data-value" id="magnitude">--</span></div>
-                    <div class="data-item"><span class="data-label">RSSI</span><span class="data-value" id="rssi">-- dBm</span></div>
-                    <div class="data-item"><span class="data-label">Latitude</span><span class="data-value" id="lat">--</span></div>
-                    <div class="data-item"><span class="data-label">Longitude</span><span class="data-value" id="lon">--</span></div>
-                    <div class="data-item"><span class="data-label">Event Counter</span><span class="data-value" id="count">--</span></div>
-                    <div class="data-item"><span class="data-label">Status</span><span class="data-value" id="statusVal">--</span></div>
+        <div id="loadingMessage" class="loading">
+            Loading sensor data...
+        </div>
+
+        <div id="mainContent" style="display: none;">
+            <div class="sensor-grid">
+                <!-- Status Module -->
+                <div class="sensor-module">
+                    <div class="module-title">System Status</div>
+                    <div class="sensor-readings">
+                        <div class="reading-item">
+                            <span class="reading-label">Status</span>
+                            <span class="reading-value" id="statusValue">--</span>
+                        </div>
+                        <div class="reading-item">
+                            <span class="reading-label">Event Counter</span>
+                            <span class="reading-value" id="countValue">--</span>
+                        </div>
+                        <div class="reading-item">
+                            <span class="reading-label">Last Event</span>
+                            <span class="reading-value" id="eventValue">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GPS Module -->
+                <div class="sensor-module">
+                    <div class="module-title">GPS Location</div>
+                    <div class="sensor-readings">
+                        <div class="reading-item">
+                            <span class="reading-label">Latitude</span>
+                            <span class="reading-value" id="latValue">--</span>
+                        </div>
+                        <div class="reading-item">
+                            <span class="reading-label">Longitude</span>
+                            <span class="reading-value" id="lonValue">--</span>
+                        </div>
+                        <div class="reading-item">
+                            <span class="reading-label">GPS Valid</span>
+                            <span class="reading-value" id="gpsValidValue">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sensor Module -->
+                <div class="sensor-module">
+                    <div class="module-title">Sensor Readings</div>
+                    <div class="sensor-readings">
+                        <div class="reading-item">
+                            <span class="reading-label">Magnitude</span>
+                            <span class="reading-value" id="magnitudeValue">--</span>
+                        </div>
+                        <div class="reading-item">
+                            <span class="reading-label">RSSI</span>
+                            <span class="reading-value" id="rssiValue">--</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="section-title">
-            <span>Event History (Impact & Drift Detection)</span>
-            <button class="btn clear-events-btn" onclick="clearEvents()">CLEAR EVENTS</button>
-        </div>
-        <div class="event-list" id="eventList">
-            <div class="empty-state"><div class="empty-state-text">No events detected yet</div></div>
+            <div class="last-update">
+                LAST UPDATE: <span id="lastUpdateTime">--</span> • AUTO REFRESH EVERY 20 SECONDS
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-const CHANNEL_ID = "3203006";
-const READ_API_KEY = "JN2TR7S7XJLS9TWW";
-const REFRESH_MS = 5000;
+    <script>
+        const CHANNEL_ID = "3203006";
+        const READ_API_KEY = "JN2TR7S7XJLS9TWW";
+        const REFRESH_MS = 20000;
+        
+        let isConnected = false;
 
-let events = [];
+        async function fetchData() {
+            const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json?api_key=${READ_API_KEY}`;
 
-async function fetchData() {
-    const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json?api_key=${READ_API_KEY}`;
-    try {
-        const res = await fetch(url);
-        const data = await res.json();
+            try {
+                const res = await fetch(url);
+                
+                if (!res.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await res.json();
+                
+                // Update connection status
+                if (!isConnected) {
+                    isConnected = true;
+                    document.getElementById('connectionDot').classList.add('connected');
+                    document.getElementById('connectionStatus').textContent = 'CONNECTED';
+                    document.getElementById('loadingMessage').style.display = 'none';
+                    document.getElementById('mainContent').style.display = 'block';
+                }
 
-        const eventType = data.field1 || '--';
-        const magnitude = data.field2 || 0;
-        const lat = data.field3 || '--';
-        const lon = data.field4 || '--';
-        const rssi = data.field5 || '--';
-        const count = data.field7 || 0;
-        const status = data.field8 || 'DISCONNECTED';
+                // Field mapping
+                const eventType = data.field1;
+                const magnitude = data.field2;
+                const lat = data.field3;
+                const lon = data.field4;
+                const rssi = data.field5;
+                const gpsValid = data.field6;
+                const count = data.field7;
+                const status = data.field8;
 
-        document.getElementById('eventType').textContent = eventType;
-        document.getElementById('magnitude').textContent = magnitude;
-        document.getElementById('lat').textContent = lat;
-        document.getElementById('lon').textContent = lon;
-        document.getElementById('rssi').textContent = rssi + ' dBm';
-        document.getElementById('count').textContent = count;
-        document.getElementById('statusVal').textContent = status;
+                // Update values
+                document.getElementById('statusValue').textContent = status || 'UNKNOWN';
+                document.getElementById('countValue').textContent = count || '0';
+                document.getElementById('eventValue').textContent = eventType || 'NONE';
+                document.getElementById('latValue').textContent = lat ? parseFloat(lat).toFixed(6) + '°' : 'NO DATA';
+                document.getElementById('lonValue').textContent = lon ? parseFloat(lon).toFixed(6) + '°' : 'NO DATA';
+                document.getElementById('gpsValidValue').textContent = gpsValid === '1' ? 'YES' : 'NO';
+                document.getElementById('magnitudeValue').textContent = magnitude || '--';
+                document.getElementById('rssiValue').textContent = rssi ? rssi + ' dBm' : '--';
 
-        // GPS banner
-        const gpsBanner = document.getElementById('gpsStatusBanner');
-        const gpsTitle = document.getElementById('gpsStatusTitle');
-        const gpsMsg = document.getElementById('gpsStatusMessage');
-        if(status.includes('GPS_FAILED')){
-            gpsBanner.classList.add('active');
-            gpsBanner.classList.remove('monitoring');
-            gpsTitle.textContent = 'GPS FAILED';
-            gpsMsg.textContent = 'Initializing...';
-        } else {
-            gpsBanner.classList.add('active','monitoring');
-            gpsTitle.textContent = 'GPS ACTIVE';
-            gpsMsg.textContent = 'Tracking position';
+                // Apply status colors
+                const statusEl = document.getElementById('statusValue');
+                statusEl.className = 'reading-value';
+                if (status === 'DEPLOYED' || status === 'ONLINE') {
+                    statusEl.classList.add('status-ok');
+                } else if (status && (status.includes('GPS') || status.includes('CALIB'))) {
+                    statusEl.classList.add('status-warn');
+                } else if (status) {
+                    statusEl.classList.add('status-danger');
+                }
+
+                // GPS valid status color
+                const gpsValidEl = document.getElementById('gpsValidValue');
+                gpsValidEl.className = 'reading-value';
+                if (gpsValid === '1') {
+                    gpsValidEl.classList.add('status-ok');
+                } else {
+                    gpsValidEl.classList.add('status-danger');
+                }
+
+                // Update timestamp
+                const now = new Date();
+                document.getElementById('lastUpdateTime').textContent = 
+                    now.toLocaleTimeString('en-US', { hour12: false });
+
+            } catch (e) {
+                console.error("ThingSpeak error", e);
+                
+                // Update connection status on error
+                if (isConnected) {
+                    isConnected = false;
+                    document.getElementById('connectionDot').classList.remove('connected');
+                    document.getElementById('connectionStatus').textContent = 'CONNECTION ERROR';
+                }
+            }
         }
 
-        // Status dot
-        const statusDot = document.getElementById('statusDot');
-        const statusText = document.getElementById('statusText');
-        statusText.textContent = status;
-        if(status === 'DEPLOYED' || status === 'ONLINE'){
-            statusDot.classList.add('connected');
-        } else {
-            statusDot.classList.remove('connected');
-        }
-
-        // Add event to history if new
-        if(eventType && eventType!=='--'){
-            const now = new Date().toLocaleString();
-            addEvent({eventType, magnitude, latitude: lat, longitude: lon, dateTime: now, locationValid: lat!=='--'});
-        }
-
-    } catch(e){
-        console.error('ThingSpeak fetch error', e);
-    }
-}
-
-function addEvent(event){
-    events.unshift(event);
-    if(events.length>10) events.pop();
-    renderEvents();
-}
-
-function renderEvents(){
-    const eventList = document.getElementById('eventList');
-    if(events.length===0){
-        eventList.innerHTML = '<div class="empty-state"><div class="empty-state-text">No events detected yet</div></div>';
-        return;
-    }
-    let html = '';
-    events.forEach(ev=>{
-        const loc = ev.locationValid ? ev.latitude + '°, ' + ev.longitude + '°' : 'No GPS fix';
-        const cls = ev.eventType.toLowerCase() === 'drift' ? 'drift' : 'impact';
-        const unit = ev.eventType.toLowerCase() === 'drift' ? 'm' : 'm/s²';
-        html += `<div class="event-item ${cls}">
-            <div class="event-header">
-                <div class="event-type">${ev.eventType}</div>
-                <div class="event-time">${ev.dateTime}</div>
-            </div>
-            <div class="event-details">
-                <div class="event-detail"><strong>Magnitude:</strong> ${ev.magnitude} ${unit}</div>
-                <div class="event-detail"><strong>Location:</strong> ${loc}</div>
-            </div>
-        </div>`;
-    });
-    eventList.innerHTML = html;
-}
-
-function clearEvents(){
-    events=[];
-    renderEvents();
-}
-
-fetchData();
-setInterval(fetchData, REFRESH_MS);
-</script>
+        // Initial fetch
+        fetchData();
+        
+        // Set up auto-refresh
+        setInterval(fetchData, REFRESH_MS);
+    </script>
 </body>
 </html>
