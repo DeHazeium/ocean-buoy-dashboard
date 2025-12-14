@@ -473,6 +473,153 @@
             50% { opacity: 0.3; }
         }
         
+        /* Notification System */
+        .notification-container {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 400px;
+        }
+        
+        .notification {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-hover);
+            border-radius: 8px;
+            padding: 16px 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            animation: slideInRight 0.4s ease-out;
+            transition: all 0.3s ease;
+        }
+        
+        .notification.hiding {
+            animation: slideOutRight 0.4s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+        
+        .notification-icon {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 6px;
+            animation: notificationPulse 2s infinite;
+        }
+        
+        @keyframes notificationPulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 currentColor;
+            }
+            50% {
+                box-shadow: 0 0 0 4px transparent;
+            }
+        }
+        
+        .notification.success .notification-icon {
+            background: var(--success);
+            color: var(--success);
+        }
+        
+        .notification.warning .notification-icon {
+            background: var(--warning);
+            color: var(--warning);
+        }
+        
+        .notification.info .notification-icon {
+            background: var(--accent);
+            color: var(--accent);
+        }
+        
+        .notification-content {
+            flex: 1;
+        }
+        
+        .notification-title {
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-bottom: 4px;
+            letter-spacing: 0.3px;
+        }
+        
+        .notification-message {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .notification-close {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            line-height: 1;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        
+        .notification-close:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        /* Value change animation */
+        .value-changed {
+            animation: valueHighlight 0.6s ease-out;
+        }
+        
+        @keyframes valueHighlight {
+            0% {
+                background: rgba(255, 255, 255, 0.2);
+                transform: scale(1.05);
+            }
+            100% {
+                background: transparent;
+                transform: scale(1);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .notification-container {
+                right: 20px;
+                left: 20px;
+                max-width: none;
+            }
+        }
+        
         /* Loading State */
         .loading-overlay {
             position: fixed;
@@ -558,12 +705,15 @@
         <div class="loading-spinner"></div>
     </div>
     
+    <!-- Notification Container -->
+    <div class="notification-container" id="notificationContainer"></div>
+    
     <div class="container">
         <!-- Header -->
         <header class="header">
             <div class="header-top">
                 <div class="header-title">
-                    <h1>ESP32 Based Buoy Monitoring</h1>
+                    <h1>ESP32 Based Buoy Monitor</h1>
                     <div class="header-subtitle">Real-time environmental data tracking</div>
                 </div>
                 <div class="status-container">
@@ -692,6 +842,130 @@
         const REFRESH_MS = 20000;
         
         let firstLoad = true;
+        let previousData = {};
+        let notificationQueue = [];
+
+        // Notification System
+        function showNotification(title, message, type = 'info') {
+            const container = document.getElementById('notificationContainer');
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            notification.innerHTML = `
+                <div class="notification-icon"></div>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+                <button class="notification-close" onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            container.appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                notification.classList.add('hiding');
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, 400);
+            }, 5000);
+        }
+        
+        // Highlight element when value changes
+        function highlightChange(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.classList.remove('value-changed');
+                void element.offsetWidth; // Trigger reflow
+                element.classList.add('value-changed');
+                setTimeout(() => {
+                    element.classList.remove('value-changed');
+                }, 600);
+            }
+        }
+        
+        // Check for changes and show notifications
+        function checkForChanges(data) {
+            if (Object.keys(previousData).length === 0) {
+                // First load, just store data
+                previousData = { ...data };
+                return;
+            }
+            
+            // Check event type change
+            if (data.eventType !== previousData.eventType && data.eventType !== 'NONE') {
+                showNotification(
+                    'New Event Detected',
+                    `Event type: ${data.eventType}`,
+                    'warning'
+                );
+                highlightChange('lastEvent');
+            }
+            
+            // Check status change
+            if (data.status !== previousData.status) {
+                const statusType = (data.status === 'DEPLOYED' || data.status === 'ONLINE') ? 'success' : 'warning';
+                showNotification(
+                    'Status Update',
+                    `Status changed to: ${data.status}`,
+                    statusType
+                );
+                highlightChange('buoyStatus');
+            }
+            
+            // Check event counter increase
+            if (parseInt(data.count) > parseInt(previousData.count || 0)) {
+                showNotification(
+                    'Event Counter Updated',
+                    `Total events: ${data.count}`,
+                    'info'
+                );
+                highlightChange('eventCounter');
+            }
+            
+            // Check GPS lock change
+            if (data.gpsValid !== previousData.gpsValid) {
+                const gpsType = data.gpsValid === '1' ? 'success' : 'warning';
+                const gpsMessage = data.gpsValid === '1' ? 'GPS lock acquired' : 'GPS lock lost';
+                showNotification(
+                    'GPS Status Change',
+                    gpsMessage,
+                    gpsType
+                );
+                highlightChange('gpsLock');
+            }
+            
+            // Check significant magnitude change
+            const prevMagnitude = parseFloat(previousData.magnitude || 0);
+            const newMagnitude = parseFloat(data.magnitude || 0);
+            if (Math.abs(newMagnitude - prevMagnitude) > 1.0) {
+                showNotification(
+                    'Magnitude Change',
+                    `New reading: ${data.magnitude}`,
+                    'info'
+                );
+                highlightChange('magnitudeValue');
+            }
+            
+            // Check RSSI change (significant = more than 5 dBm)
+            const prevRSSI = parseFloat(previousData.rssi || 0);
+            const newRSSI = parseFloat(data.rssi || 0);
+            if (Math.abs(newRSSI - prevRSSI) > 5) {
+                const rssiType = newRSSI > prevRSSI ? 'success' : 'warning';
+                showNotification(
+                    'Signal Strength Change',
+                    `RSSI: ${data.rssi} dBm`,
+                    rssiType
+                );
+                highlightChange('rssiValue');
+            }
+            
+            // Update previous data
+            previousData = { ...data };
+        }
 
         async function fetchData() {
             const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json?api_key=${READ_API_KEY}`;
@@ -709,6 +983,11 @@
                 if (firstLoad) {
                     setTimeout(() => {
                         document.getElementById('loadingOverlay').classList.add('hidden');
+                        showNotification(
+                            'Connection Established',
+                            'Dashboard connected to ThingSpeak',
+                            'success'
+                        );
                     }, 800);
                     firstLoad = false;
                 }
@@ -718,49 +997,54 @@
                 document.getElementById('connectionText').textContent = 'CONNECTED';
                 
                 // Parse fields
-                const eventType = data.field1 || 'NONE';
-                const magnitude = data.field2 || '--';
-                const lat = data.field3;
-                const lon = data.field4;
-                const rssi = data.field5;
-                const gpsValid = data.field6;
-                const count = data.field7 || '0';
-                const status = data.field8 || 'UNKNOWN';
+                const parsedData = {
+                    eventType: data.field1 || 'NONE',
+                    magnitude: data.field2 || '--',
+                    lat: data.field3,
+                    lon: data.field4,
+                    rssi: data.field5,
+                    gpsValid: data.field6,
+                    count: data.field7 || '0',
+                    status: data.field8 || 'UNKNOWN'
+                };
+                
+                // Check for changes and show notifications
+                checkForChanges(parsedData);
                 
                 // Update primary stats
-                document.getElementById('eventCounter').textContent = count;
-                document.getElementById('rssiValue').textContent = rssi || '--';
-                document.getElementById('magnitudeValue').textContent = magnitude;
-                document.getElementById('lastEvent').textContent = eventType;
+                document.getElementById('eventCounter').textContent = parsedData.count;
+                document.getElementById('rssiValue').textContent = parsedData.rssi || '--';
+                document.getElementById('magnitudeValue').textContent = parsedData.magnitude;
+                document.getElementById('lastEvent').textContent = parsedData.eventType;
                 
                 // Update status panel
                 const operationalStatusEl = document.getElementById('operationalStatus');
                 let statusBadge = '';
-                if (status === 'DEPLOYED' || status === 'ONLINE') {
-                    statusBadge = `<span class="badge success">${status}</span>`;
-                } else if (status.includes('GPS') || status.includes('CALIB')) {
-                    statusBadge = `<span class="badge warning">${status}</span>`;
+                if (parsedData.status === 'DEPLOYED' || parsedData.status === 'ONLINE') {
+                    statusBadge = `<span class="badge success">${parsedData.status}</span>`;
+                } else if (parsedData.status.includes('GPS') || parsedData.status.includes('CALIB')) {
+                    statusBadge = `<span class="badge warning">${parsedData.status}</span>`;
                 } else {
-                    statusBadge = `<span class="badge danger">${status}</span>`;
+                    statusBadge = `<span class="badge danger">${parsedData.status}</span>`;
                 }
                 operationalStatusEl.innerHTML = statusBadge;
                 
                 const gpsLockEl = document.getElementById('gpsLock');
-                if (gpsValid === '1') {
+                if (parsedData.gpsValid === '1') {
                     gpsLockEl.innerHTML = '<span class="badge success">LOCKED</span>';
                 } else {
                     gpsLockEl.innerHTML = '<span class="badge danger">NO LOCK</span>';
                 }
                 
                 // Update secondary cards
-                document.getElementById('buoyStatus').textContent = status;
-                document.getElementById('gpsValid').textContent = gpsValid === '1' ? 'VALID' : 'INVALID';
+                document.getElementById('buoyStatus').textContent = parsedData.status;
+                document.getElementById('gpsValid').textContent = parsedData.gpsValid === '1' ? 'VALID' : 'INVALID';
                 
                 // Update location
                 document.getElementById('latitudeValue').textContent = 
-                    lat ? parseFloat(lat).toFixed(6) + '°' : 'NO DATA';
+                    parsedData.lat ? parseFloat(parsedData.lat).toFixed(6) + '°' : 'NO DATA';
                 document.getElementById('longitudeValue').textContent = 
-                    lon ? parseFloat(lon).toFixed(6) + '°' : 'NO DATA';
+                    parsedData.lon ? parseFloat(parsedData.lon).toFixed(6) + '°' : 'NO DATA';
                 
                 // Update timestamp
                 const now = new Date();
@@ -771,6 +1055,14 @@
                 console.error("Error fetching data:", e);
                 document.getElementById('statusIndicator').classList.remove('active');
                 document.getElementById('connectionText').textContent = 'ERROR';
+                
+                if (!firstLoad) {
+                    showNotification(
+                        'Connection Error',
+                        'Failed to fetch data from ThingSpeak',
+                        'warning'
+                    );
+                }
             }
         }
 
@@ -782,4 +1074,3 @@
     </script>
 </body>
 </html>
-
