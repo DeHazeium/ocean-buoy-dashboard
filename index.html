@@ -208,8 +208,9 @@
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 30px;
+            padding: 25px;
             transition: border-color 0.3s;
+            height: fit-content;
         }
         
         .chart-section:hover {
@@ -222,7 +223,11 @@
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .chart-section canvas {
+            max-height: 200px;
         }
         
         /* Stats grid */
@@ -746,7 +751,7 @@
             <!-- Chart -->
             <div class="chart-section">
                 <div class="chart-title">Magnitude Trend (Last 15 readings)</div>
-                <canvas id="chart" height="80"></canvas>
+                <canvas id="chart"></canvas>
             </div>
             
             <!-- Status Panel -->
