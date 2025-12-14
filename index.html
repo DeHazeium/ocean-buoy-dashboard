@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ocean Buoy Dashboard</title>
+    <title>Ocean Buoy Monitoring Station</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -14,376 +14,627 @@
             box-sizing: border-box;
         }
         
+        :root {
+            --cyan: #00fff9;
+            --cyan-glow: rgba(0, 255, 249, 0.5);
+            --purple: #bd00ff;
+            --purple-glow: rgba(189, 0, 255, 0.5);
+            --pink: #ff006e;
+            --blue: #0066ff;
+            --dark: #0a0e27;
+            --darker: #050614;
+        }
+        
         body {
-            font-family: 'Montserrat', sans-serif;
-            background: #000000;
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--darker);
             color: #ffffff;
             min-height: 100vh;
-            padding: 40px 20px;
-            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Animated background grid */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--cyan) 1px, transparent 1px),
+                linear-gradient(90deg, var(--cyan) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.03;
+            animation: gridScroll 20s linear infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        @keyframes gridScroll {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(50px); }
+        }
+        
+        /* Glow orbs in background */
+        .bg-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 0;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--cyan);
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+        
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--purple);
+            bottom: -50px;
+            right: -50px;
+            animation-delay: -4s;
+        }
+        
+        .orb-3 {
+            width: 350px;
+            height: 350px;
+            background: var(--pink);
+            top: 30%;
+            right: 10%;
+            animation-delay: -2s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
         }
         
         .container {
-            max-width: 1600px;
+            position: relative;
+            z-index: 10;
+            max-width: 1800px;
             margin: 0 auto;
+            padding: 40px 30px;
         }
         
+        /* Header */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 60px;
-            padding-bottom: 30px;
-            border-bottom: 1px solid #222222;
+            margin-bottom: 50px;
+            padding: 30px;
+            background: rgba(10, 14, 39, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 255, 249, 0.2);
+            border-radius: 2px;
+            box-shadow: 
+                0 0 30px rgba(0, 255, 249, 0.1),
+                inset 0 0 20px rgba(0, 255, 249, 0.05);
+            animation: slideDown 0.8s ease-out;
         }
         
-        .header-title {
-            display: flex;
-            align-items: baseline;
-            gap: 16px;
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
-        .header h1 {
-            font-size: 2em;
-            font-weight: 700;
-            color: #ffffff;
-            letter-spacing: -1px;
+        .header-left h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5em;
+            font-weight: 900;
+            letter-spacing: 3px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             text-transform: uppercase;
+            margin-bottom: 8px;
+            text-shadow: 0 0 30px var(--cyan-glow);
         }
         
-        .header-credit {
-            font-size: 0.75em;
-            font-weight: 500;
-            color: #666666;
-            letter-spacing: 1px;
-            text-transform: lowercase;
+        .header-left .subtitle {
+            font-size: 1em;
+            color: var(--cyan);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            font-weight: 300;
         }
         
-        .status-indicator {
-            display: flex;
+        .header-right {
+            text-align: right;
+        }
+        
+        .status-pill {
+            display: inline-flex;
             align-items: center;
-            gap: 12px;
-            font-size: 0.8em;
+            gap: 10px;
+            padding: 12px 24px;
+            background: rgba(0, 255, 249, 0.1);
+            border: 1px solid var(--cyan);
+            border-radius: 50px;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.85em;
             font-weight: 600;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            box-shadow: 0 0 20px var(--cyan-glow);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px var(--cyan-glow); }
+            50% { box-shadow: 0 0 30px var(--cyan-glow), 0 0 40px var(--cyan-glow); }
         }
         
         .status-dot {
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            background: #444444;
-            position: relative;
+            background: var(--cyan);
+            box-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan);
+            animation: blink 1s ease-in-out infinite;
         }
         
-        .status-dot::after {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: 50%;
-            border: 1px solid #444444;
-            opacity: 0;
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
         
-        .status-dot.connected {
-            background: #ffffff;
-            box-shadow: 0 0 20px rgba(255,255,255,0.5);
+        .last-sync {
+            margin-top: 8px;
+            font-size: 0.75em;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 1px;
         }
         
-        .status-dot.connected::after {
-            border-color: #ffffff;
-            opacity: 0.3;
-            animation: ripple 2s infinite;
-        }
-        
-        @keyframes ripple {
-            0% {
-                transform: scale(1);
-                opacity: 0.3;
-            }
-            100% {
-                transform: scale(2);
-                opacity: 0;
-            }
-        }
-        
-        .sensor-grid {
+        /* Data Grid */
+        .data-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
             margin-bottom: 40px;
         }
         
-        .sensor-module {
-            background: #0a0a0a;
-            border: 1px solid #222222;
-            border-radius: 0;
+        .data-card {
+            background: rgba(10, 14, 39, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 249, 0.3);
             padding: 30px;
             position: relative;
             overflow: hidden;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.6s ease-out backwards;
         }
         
-        .sensor-module::before {
+        .data-card:nth-child(1) { animation-delay: 0.1s; }
+        .data-card:nth-child(2) { animation-delay: 0.2s; }
+        .data-card:nth-child(3) { animation-delay: 0.3s; }
+        .data-card:nth-child(4) { animation-delay: 0.4s; }
+        .data-card:nth-child(5) { animation-delay: 0.5s; }
+        .data-card:nth-child(6) { animation-delay: 0.6s; }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .data-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #ffffff, transparent);
-            opacity: 0.1;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
-        .module-title {
+        .data-card:hover {
+            border-color: var(--cyan);
+            box-shadow: 0 0 30px var(--cyan-glow);
+            transform: translateY(-5px);
+        }
+        
+        .data-card:hover::before {
+            opacity: 1;
+        }
+        
+        .card-label {
+            font-family: 'Orbitron', monospace;
             font-size: 0.7em;
-            font-weight: 700;
-            color: #666666;
+            color: rgba(0, 255, 249, 0.7);
+            letter-spacing: 3px;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-        }
-        
-        .sensor-readings {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        .reading-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            padding: 15px 0;
-            border-bottom: 1px solid #1a1a1a;
-        }
-        
-        .reading-item:last-child {
-            border-bottom: none;
-        }
-        
-        .reading-label {
-            font-size: 0.75em;
+            margin-bottom: 15px;
             font-weight: 600;
-            color: #999999;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
         }
         
-        .reading-value {
-            font-size: 1.3em;
+        .card-value {
+            font-size: 2.5em;
             font-weight: 700;
             color: #ffffff;
-            letter-spacing: -0.5px;
+            letter-spacing: -1px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            font-family: 'Orbitron', monospace;
+            margin-bottom: 10px;
+            line-height: 1;
         }
         
-        .reading-value.invalid {
-            color: #555555;
+        .card-value.highlight {
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
-        .reading-value.status-ok {
-            color: #00ff00;
-        }
-        
-        .reading-value.status-warn {
-            color: #ffaa00;
-        }
-        
-        .reading-value.status-danger {
-            color: #ff3333;
+        .card-subtext {
+            font-size: 0.85em;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 1px;
         }
         
         .status-badge {
             display: inline-block;
-            padding: 6px 16px;
-            background: #1a1a1a;
-            border: 1px solid #333333;
-            border-radius: 0;
+            padding: 6px 14px;
+            border-radius: 3px;
             font-size: 0.7em;
             font-weight: 700;
-            letter-spacing: 1.5px;
+            letter-spacing: 2px;
             text-transform: uppercase;
+            font-family: 'Orbitron', monospace;
         }
         
-        .status-badge.deployed {
-            background: #001a00;
-            border-color: #00ff00;
+        .status-badge.online {
+            background: rgba(0, 255, 0, 0.2);
             color: #00ff00;
+            border: 1px solid #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
         }
         
         .status-badge.warning {
-            background: #1a1000;
-            border-color: #ffaa00;
+            background: rgba(255, 170, 0, 0.2);
             color: #ffaa00;
+            border: 1px solid #ffaa00;
+            box-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
         }
         
         .status-badge.error {
-            background: #1a0000;
-            border-color: #ff3333;
-            color: #ff3333;
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff0000;
+            border: 1px solid #ff0000;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
         }
         
-        .event-history {
-            background: #0a0a0a;
-            border: 1px solid #222222;
-            border-radius: 0;
-            padding: 30px;
-            margin-top: 40px;
+        /* Large Stats Section */
+        .stats-hero {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
         }
         
-        .history-header {
-            font-size: 0.7em;
-            font-weight: 700;
-            color: #666666;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #1a1a1a;
+        .stat-box {
+            background: linear-gradient(135deg, rgba(0, 255, 249, 0.1), rgba(189, 0, 255, 0.1));
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            padding: 40px 30px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
         
-        .event-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-            border-bottom: 1px solid #1a1a1a;
+        .stat-box::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            z-index: -1;
+            opacity: 0.5;
         }
         
-        .event-item:last-child {
-            border-bottom: none;
+        .stat-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 40px rgba(0, 255, 249, 0.3);
         }
         
-        .event-type {
-            font-size: 0.85em;
-            font-weight: 700;
-            color: #ffffff;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .event-magnitude {
-            font-size: 0.9em;
-            font-weight: 600;
-            color: #999999;
-        }
-        
-        .last-update {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 1px solid #222222;
+        .stat-label {
+            font-family: 'Orbitron', monospace;
             font-size: 0.75em;
-            color: #666666;
-            letter-spacing: 1px;
+            color: var(--cyan);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
         }
         
-        .loading {
+        .stat-value {
+            font-size: 3em;
+            font-weight: 900;
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, #ffffff, var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+        
+        /* Coordinates Display */
+        .coordinates-panel {
+            background: rgba(10, 14, 39, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(189, 0, 255, 0.3);
+            padding: 40px;
+            margin-bottom: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .coordinates-panel::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1px;
+            height: 60%;
+            background: linear-gradient(to bottom, transparent, var(--purple), transparent);
+            transform: translate(-50%, -50%);
+        }
+        
+        .coord-item {
             text-align: center;
-            padding: 60px 20px;
-            font-size: 0.9em;
-            color: #666666;
-            letter-spacing: 1px;
         }
         
+        .coord-label {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.8em;
+            color: var(--purple);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .coord-value {
+            font-size: 2em;
+            font-weight: 700;
+            font-family: 'Orbitron', monospace;
+            color: #ffffff;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px var(--purple-glow);
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px;
+            margin-top: 60px;
+            border-top: 1px solid rgba(0, 255, 249, 0.2);
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
+        }
+        
+        /* Loading */
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--darker);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .loading-content {
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            border: 3px solid rgba(0, 255, 249, 0.1);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 30px;
+            box-shadow: 0 0 30px var(--cyan-glow);
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2em;
+            color: var(--cyan);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        
+        /* Responsive */
         @media (max-width: 768px) {
-            body {
-                padding: 20px 15px;
-            }
-            
             .header {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 20px;
             }
             
-            .header h1 {
-                font-size: 1.5em;
+            .header-left h1 {
+                font-size: 1.8em;
             }
             
-            .sensor-grid {
+            .data-grid {
                 grid-template-columns: 1fr;
-                gap: 20px;
             }
+            
+            .coordinates-panel {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .coordinates-panel::after {
+                width: 60%;
+                height: 1px;
+                top: 50%;
+                left: 50%;
+            }
+        }
+        
+        /* Scanline effect */
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+        
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to bottom, transparent, var(--cyan), transparent);
+            opacity: 0.1;
+            animation: scanline 8s linear infinite;
+            pointer-events: none;
+            z-index: 100;
         }
     </style>
 </head>
 <body>
+    <!-- Background effects -->
+    <div class="bg-grid"></div>
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
+    <div class="scanline"></div>
+    
+    <!-- Loading screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Initializing Connection</div>
+        </div>
+    </div>
+    
     <div class="container">
+        <!-- Header -->
         <div class="header">
-            <div class="header-title">
-                <h1>ESP32 Based Buoy Monitor</h1>
-                <span class="header-credit">by Hzetronics</span>
+            <div class="header-left">
+                <h1>🌊 OCEAN SENTINEL</h1>
+                <div class="subtitle">Deep Sea Monitoring System</div>
             </div>
-            <div class="status-indicator">
-                <div class="status-dot" id="connectionDot"></div>
-                <span id="connectionStatus">CONNECTING...</span>
+            <div class="header-right">
+                <div class="status-pill">
+                    <div class="status-dot"></div>
+                    <span id="connectionStatus">CONNECTING</span>
+                </div>
+                <div class="last-sync">LAST SYNC: <span id="lastSync">--:--:--</span></div>
             </div>
         </div>
-
-        <div id="loadingMessage" class="loading">
-            Loading sensor data...
+        
+        <!-- Hero Stats -->
+        <div class="stats-hero">
+            <div class="stat-box">
+                <div class="stat-label">System Status</div>
+                <div class="stat-value" id="heroStatus">--</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Events Detected</div>
+                <div class="stat-value" id="heroCount">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Signal Strength</div>
+                <div class="stat-value" id="heroRSSI">--</div>
+            </div>
         </div>
-
-        <div id="mainContent" style="display: none;">
-            <div class="sensor-grid">
-                <!-- Status Module -->
-                <div class="sensor-module">
-                    <div class="module-title">System Status</div>
-                    <div class="sensor-readings">
-                        <div class="reading-item">
-                            <span class="reading-label">Status</span>
-                            <span class="reading-value" id="statusValue">--</span>
-                        </div>
-                        <div class="reading-item">
-                            <span class="reading-label">Event Counter</span>
-                            <span class="reading-value" id="countValue">--</span>
-                        </div>
-                        <div class="reading-item">
-                            <span class="reading-label">Last Event</span>
-                            <span class="reading-value" id="eventValue">--</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- GPS Module -->
-                <div class="sensor-module">
-                    <div class="module-title">GPS Location</div>
-                    <div class="sensor-readings">
-                        <div class="reading-item">
-                            <span class="reading-label">Latitude</span>
-                            <span class="reading-value" id="latValue">--</span>
-                        </div>
-                        <div class="reading-item">
-                            <span class="reading-label">Longitude</span>
-                            <span class="reading-value" id="lonValue">--</span>
-                        </div>
-                        <div class="reading-item">
-                            <span class="reading-label">GPS Valid</span>
-                            <span class="reading-value" id="gpsValidValue">--</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sensor Module -->
-                <div class="sensor-module">
-                    <div class="module-title">Sensor Readings</div>
-                    <div class="sensor-readings">
-                        <div class="reading-item">
-                            <span class="reading-label">Magnitude</span>
-                            <span class="reading-value" id="magnitudeValue">--</span>
-                        </div>
-                        <div class="reading-item">
-                            <span class="reading-label">RSSI</span>
-                            <span class="reading-value" id="rssiValue">--</span>
-                        </div>
-                    </div>
-                </div>
+        
+        <!-- Coordinates -->
+        <div class="coordinates-panel">
+            <div class="coord-item">
+                <div class="coord-label">◈ Latitude</div>
+                <div class="coord-value" id="latValue">--°</div>
             </div>
-
-            <div class="last-update">
-                LAST UPDATE: <span id="lastUpdateTime">--</span> • AUTO REFRESH EVERY 20 SECONDS
+            <div class="coord-item">
+                <div class="coord-label">◈ Longitude</div>
+                <div class="coord-value" id="lonValue">--°</div>
             </div>
+        </div>
+        
+        <!-- Data Cards -->
+        <div class="data-grid">
+            <div class="data-card">
+                <div class="card-label">▸ Buoy Status</div>
+                <div class="card-value" id="statusValue">--</div>
+                <div class="card-subtext">Operational Mode</div>
+            </div>
+            
+            <div class="data-card">
+                <div class="card-label">▸ Last Event Type</div>
+                <div class="card-value highlight" id="eventValue">--</div>
+                <div class="card-subtext">Recent Detection</div>
+            </div>
+            
+            <div class="data-card">
+                <div class="card-label">▸ Magnitude</div>
+                <div class="card-value" id="magnitudeValue">--</div>
+                <div class="card-subtext">Measurement Unit</div>
+            </div>
+            
+            <div class="data-card">
+                <div class="card-label">▸ GPS Validity</div>
+                <div class="card-value" id="gpsValidValue">--</div>
+                <div class="card-subtext">Position Lock</div>
+            </div>
+            
+            <div class="data-card">
+                <div class="card-label">▸ RSSI Signal</div>
+                <div class="card-value" id="rssiValue">--</div>
+                <div class="card-subtext">Network Quality</div>
+            </div>
+            
+            <div class="data-card">
+                <div class="card-label">▸ Event Counter</div>
+                <div class="card-value highlight" id="countValue">0</div>
+                <div class="card-subtext">Total Detections</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            AUTO-REFRESH ENABLED • THINGSPEAK API • 20 SECOND INTERVAL
         </div>
     </div>
 
@@ -392,7 +643,7 @@
         const READ_API_KEY = "JN2TR7S7XJLS9TWW";
         const REFRESH_MS = 20000;
         
-        let isConnected = false;
+        let isFirstLoad = true;
 
         async function fetchData() {
             const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json?api_key=${READ_API_KEY}`;
@@ -406,79 +657,60 @@
                 
                 const data = await res.json();
                 
-                // Update connection status
-                if (!isConnected) {
-                    isConnected = true;
-                    document.getElementById('connectionDot').classList.add('connected');
-                    document.getElementById('connectionStatus').textContent = 'CONNECTED';
-                    document.getElementById('loadingMessage').style.display = 'none';
-                    document.getElementById('mainContent').style.display = 'block';
+                // Hide loading screen on first successful load
+                if (isFirstLoad) {
+                    setTimeout(() => {
+                        document.getElementById('loadingScreen').classList.add('hidden');
+                    }, 1000);
+                    isFirstLoad = false;
                 }
+                
+                // Update connection status
+                document.getElementById('connectionStatus').textContent = 'ONLINE';
 
-                // Field mapping
-                const eventType = data.field1;
-                const magnitude = data.field2;
+                // Parse data
+                const eventType = data.field1 || 'NONE';
+                const magnitude = data.field2 || '--';
                 const lat = data.field3;
                 const lon = data.field4;
                 const rssi = data.field5;
                 const gpsValid = data.field6;
-                const count = data.field7;
-                const status = data.field8;
+                const count = data.field7 || '0';
+                const status = data.field8 || 'UNKNOWN';
 
-                // Update values
-                document.getElementById('statusValue').textContent = status || 'UNKNOWN';
-                document.getElementById('countValue').textContent = count || '0';
-                document.getElementById('eventValue').textContent = eventType || 'NONE';
-                document.getElementById('latValue').textContent = lat ? parseFloat(lat).toFixed(6) + '°' : 'NO DATA';
-                document.getElementById('lonValue').textContent = lon ? parseFloat(lon).toFixed(6) + '°' : 'NO DATA';
-                document.getElementById('gpsValidValue').textContent = gpsValid === '1' ? 'YES' : 'NO';
-                document.getElementById('magnitudeValue').textContent = magnitude || '--';
+                // Update hero stats
+                document.getElementById('heroStatus').textContent = status;
+                document.getElementById('heroCount').textContent = count;
+                document.getElementById('heroRSSI').textContent = rssi ? rssi + ' dBm' : '--';
+
+                // Update coordinates
+                document.getElementById('latValue').textContent = lat ? parseFloat(lat).toFixed(6) + '°' : 'NO FIX';
+                document.getElementById('lonValue').textContent = lon ? parseFloat(lon).toFixed(6) + '°' : 'NO FIX';
+
+                // Update data cards
+                document.getElementById('statusValue').textContent = status;
+                document.getElementById('eventValue').textContent = eventType;
+                document.getElementById('magnitudeValue').textContent = magnitude;
+                document.getElementById('gpsValidValue').textContent = gpsValid === '1' ? 'VALID' : 'INVALID';
                 document.getElementById('rssiValue').textContent = rssi ? rssi + ' dBm' : '--';
-
-                // Apply status colors
-                const statusEl = document.getElementById('statusValue');
-                statusEl.className = 'reading-value';
-                if (status === 'DEPLOYED' || status === 'ONLINE') {
-                    statusEl.classList.add('status-ok');
-                } else if (status && (status.includes('GPS') || status.includes('CALIB'))) {
-                    statusEl.classList.add('status-warn');
-                } else if (status) {
-                    statusEl.classList.add('status-danger');
-                }
-
-                // GPS valid status color
-                const gpsValidEl = document.getElementById('gpsValidValue');
-                gpsValidEl.className = 'reading-value';
-                if (gpsValid === '1') {
-                    gpsValidEl.classList.add('status-ok');
-                } else {
-                    gpsValidEl.classList.add('status-danger');
-                }
+                document.getElementById('countValue').textContent = count;
 
                 // Update timestamp
                 const now = new Date();
-                document.getElementById('lastUpdateTime').textContent = 
+                document.getElementById('lastSync').textContent = 
                     now.toLocaleTimeString('en-US', { hour12: false });
 
             } catch (e) {
                 console.error("ThingSpeak error", e);
-                
-                // Update connection status on error
-                if (isConnected) {
-                    isConnected = false;
-                    document.getElementById('connectionDot').classList.remove('connected');
-                    document.getElementById('connectionStatus').textContent = 'CONNECTION ERROR';
-                }
+                document.getElementById('connectionStatus').textContent = 'ERROR';
             }
         }
 
         // Initial fetch
         fetchData();
         
-        // Set up auto-refresh
+        // Auto-refresh
         setInterval(fetchData, REFRESH_MS);
     </script>
 </body>
 </html>
-
-
