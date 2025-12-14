@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ocean Buoy Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Minimalist styling -->
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --card: #121821;
+      --accent: #2dd4bf;
+      --danger: #ef4444;
+      --warn: #f59e0b;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: "Inter", system-ui, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #1f2937;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      letter-spacing: 0.05em;
+    }
+
+    header span {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .container {
+      padding: 1.5rem;
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 1.2rem;
+      box-shadow: 0 0 0 1px #1f2937;
+    }
+
+    .label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .value {
+      margin-top: 0.4rem;
+      font-size: 1.6rem;
+      font-weight: 600;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 0.3rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .ok { background: #064e3b; color: var(--accent); }
+    .warn { background: #78350f; color: var(--warn); }
+    .bad { background: #7f1d1d; color: var(--danger); }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🌊 Ocean Buoy Dashboard</h1>
+  <span>Live monitoring via ThingSpeak</span>
+</header>
+
+<div class="container">
+  <div class="grid">
+
+    <div class="card">
+      <div class="label">Buoy Status</div>
+      <div class="value" id="status">--</div>
+      <div class="status ok" id="statusBadge">UNKNOWN</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Last Event</div>
+      <div class="value" id="event">--</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Magnitude</div>
+      <div class="value" id="magnitude">--</div>
+    </div>
+
+    <div class="card">
+      <div class="label">RSSI</div>
+      <div class="value" id="rssi">-- dBm</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Latitude</div>
+      <div class="value" id="lat">--</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Longitude</div>
+      <div class="value" id="lon">--</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Event Counter</div>
+      <div class="value" id="count">--</div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  Auto refresh every 20 seconds • Powered by ThingSpeak
+</footer>
+
+<script>
+  const CHANNEL_ID = "3203006";
+  const READ_API_KEY = "JN2TR7S7XJLS9TWW"; // leave empty if public
+  const REFRESH_MS = 20000;
+
+  async function fetchData() {
+    const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json?api_key=${READ_API_KEY}`;
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      // Field mapping based on your ESP32 code
+      const eventType = data.field1;
+      const magnitude = data.field2;
+      const lat = data.field3;
+      const lon = data.field4;
+      const rssi = data.field5;
+      const gpsValid = data.field6;
+      const count = data.field7;
+      const status = data.field8;
+
+      document.getElementById("event").textContent = eventType || "--";
+      document.getElementById("magnitude").textContent = magnitude || "--";
+      document.getElementById("lat").textContent = lat || "--";
+      document.getElementById("lon").textContent = lon || "--";
+      document.getElementById("rssi").textContent = rssi ? `${rssi} dBm` : "--";
+      document.getElementById("count").textContent = count || "--";
+      document.getElementById("status").textContent = status || "--";
+
+      const badge = document.getElementById("statusBadge");
+      badge.textContent = status || "UNKNOWN";
+
+      badge.className = "status";
+      if (status === "DEPLOYED" || status === "ONLINE") badge.classList.add("ok");
+      else if (status.includes("GPS") || status.includes("CALIB")) badge.classList.add("warn");
+      else badge.classList.add("bad");
+
+    } catch (e) {
+      console.error("ThingSpeak error", e);
+    }
+  }
+
+  fetchData();
+  setInterval(fetchData, REFRESH_MS);
+</script>
+
+</body>
+</html>
