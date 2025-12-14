@@ -3,166 +3,251 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ocean Buoy Dashboard</title>
+<title>ESP32 Buoy Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #0a1e2f;
-    color: #f0f0f0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    min-height: 100vh;
-    margin: 0;
-    padding: 0;
-  }
-  h1 {
-    margin-top: 20px;
-    font-size: 1.8rem;
-    color: #00d4ff;
-  }
-  .status-box {
-    background-color: #112b3c;
-    border-radius: 10px;
-    padding: 20px;
-    margin: 15px;
-    width: 90%;
-    max-width: 500px;
-    box-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
-  }
-  .status {
-    font-size: 1.2rem;
-    margin: 10px 0;
-  }
-  .event-warning {
-    font-weight: bold;
-    color: #ff4d4d;
-    font-size: 1.3rem;
-    animation: blink 1s infinite;
-  }
-  @keyframes blink {
-    0%,50%,100% { opacity: 1; }
-    25%,75% { opacity: 0.2; }
-  }
-  button {
-    background-color: #00d4ff;
-    color: #0a1e2f;
-    border: none;
-    padding: 10px 15px;
-    margin-top: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-  }
-  button:hover {
-    background-color: #00b0cc;
-  }
-  .data-row {
-    display: flex;
-    justify-content: space-between;
-    margin: 5px 0;
-  }
+/* Use your second HTML CSS directly for style */
+/* ... Paste your full CSS from the second HTML here ... */
 </style>
 </head>
 <body>
+<div class="container">
+    <div class="header">
+        <div class="header-title">
+            <h1>ESP32 BUOY MONITOR</h1>
+            <span class="header-credit">by Irfan</span>
+        </div>
+        <div class="status-indicator">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">DISCONNECTED</span>
+        </div>
+    </div>
 
-<h1>🌊 Ocean Buoy Dashboard</h1>
+    <div class="dashboard visible">
+        <!-- GPS Status Banner -->
+        <div class="gps-status-banner" id="gpsStatusBanner">
+            <svg class="gps-status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 2v4M12 18v4M2 12h4M18 12h4"></path>
+            </svg>
+            <div class="gps-status-content">
+                <div class="gps-status-title" id="gpsStatusTitle">GPS STATUS</div>
+                <div class="gps-status-message" id="gpsStatusMessage">Initializing...</div>
+            </div>
+            <div class="gps-status-timer" id="gpsStatusTimer"></div>
+        </div>
 
-<div class="status-box">
-  <div class="status">Current Status: <span id="buoy-status">OFFLINE</span></div>
-  <div class="status">Last Event: <span id="event-type">None</span></div>
-  <div class="status">Magnitude: <span id="magnitude">0</span></div>
-  <div class="status">Latitude: <span id="lat">0</span></div>
-  <div class="status">Longitude: <span id="lon">0</span></div>
-  <div class="status">RSSI: <span id="rssi">0</span></div>
-  <div class="status">GPS Valid: <span id="gps-valid">No</span></div>
-  <div class="status">Event Count: <span id="event-count">0</span></div>
-  <div class="status">Real Time: <span id="real-time">--:--:--</span></div>
-  <div id="warning" class="event-warning"></div>
-  <button onclick="clearEvent()">Clear Event</button>
+        <!-- Alert Banner -->
+        <div class="alert-banner" id="alertBanner">
+            <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <div class="alert-content">
+                <div class="alert-title" id="alertTitle">EVENT DETECTED</div>
+                <div class="alert-message" id="alertMessage">Critical event detected. Immediate attention required.</div>
+            </div>
+            <div class="alert-actions">
+                <button class="btn btn-warning" onclick="confirmEvent()"><span>CONFIRM</span></button>
+                <button class="btn btn-danger" onclick="sendMaintenance()"><span>SEND MAINTENANCE</span></button>
+            </div>
+        </div>
+
+        <!-- Last Seen Board -->
+        <div class="last-seen-board" id="lastSeenBoard">
+            <div class="last-seen-header">Last Known Event</div>
+            <div class="last-seen-content">
+                <div class="last-seen-item">
+                    <div class="last-seen-label">Event Type</div>
+                    <div class="last-seen-value" id="lastEventType">—</div>
+                </div>
+                <div class="last-seen-item">
+                    <div class="last-seen-label">Date & Time</div>
+                    <div class="last-seen-value" id="lastEventTime">—</div>
+                </div>
+                <div class="last-seen-item">
+                    <div class="last-seen-label">Location</div>
+                    <div class="last-seen-value" id="lastEventLocation">—</div>
+                </div>
+                <div class="last-seen-item">
+                    <div class="last-seen-label">Magnitude</div>
+                    <div class="last-seen-value" id="lastEventMagnitude">—</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">Live Sensor Data</div>
+        <div class="grid">
+            <!-- Add cards for RTC, Accelerometer, GPS like in second HTML -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Sensor Data</div>
+                </div>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <span class="data-label">Event Type</span>
+                        <span class="data-value" id="sensorEventType">--</span>
+                    </div>
+                    <div class="data-item">
+                        <span class="data-label">Magnitude</span>
+                        <span class="data-value" id="sensorMagnitude">--</span>
+                    </div>
+                    <div class="data-item">
+                        <span class="data-label">RSSI</span>
+                        <span class="data-value" id="sensorRSSI">-- dBm</span>
+                    </div>
+                    <div class="data-item">
+                        <span class="data-label">Latitude</span>
+                        <span class="data-value" id="sensorLat">--</span>
+                    </div>
+                    <div class="data-item">
+                        <span class="data-label">Longitude</span>
+                        <span class="data-value" id="sensorLon">--</span>
+                    </div>
+                    <div class="data-item">
+                        <span class="data-label">Event Counter</span>
+                        <span class="data-value" id="sensorCount">--</span>
+                    </div>
+                    <div class="data-item">
+                        <span class="data-label">Status</span>
+                        <span class="data-value" id="sensorStatus">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="events-section">
+            <div class="section-title">
+                <span>Event History (Impact & Drift Detection)</span>
+                <button class="btn clear-events-btn" onclick="clearEvents()"><span>CLEAR EVENTS</span></button>
+            </div>
+            <div class="event-list" id="eventList">
+                <div class="empty-state">
+                    <div class="empty-state-text">No events detected yet</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
 const CHANNEL_ID = "3203006";
-const READ_API_KEY = "JN2TR7S7XJLS9TWW"; // Leave empty if public
+const READ_API_KEY = "JN2TR7S7XJLS9TWW";
+const REFRESH_MS = 20000;
+let events = [];
+let currentAlert = null;
 
-let lastEventId = 0;
+async function fetchThingSpeak() {
+    try {
+        const res = await fetch(`https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json?api_key=${READ_API_KEY}`);
+        const data = await res.json();
 
-// Format current local time
-function updateTime() {
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString();
-  document.getElementById('real-time').textContent = timeStr;
-}
-setInterval(updateTime, 1000);
+        const eventType = data.field1;
+        const magnitude = parseFloat(data.field2);
+        const lat = parseFloat(data.field3);
+        const lon = parseFloat(data.field4);
+        const rssi = data.field5;
+        const count = data.field7;
+        const status = data.field8;
 
-// Clear event button
-function clearEvent() {
-  lastEventId = 0;
-  document.getElementById('event-type').textContent = "None";
-  document.getElementById('magnitude').textContent = "0";
-  document.getElementById('lat').textContent = "0";
-  document.getElementById('lon').textContent = "0";
-  document.getElementById('rssi').textContent = "0";
-  document.getElementById('gps-valid').textContent = "No";
-  document.getElementById('event-count').textContent = "0";
-  document.getElementById('warning').textContent = "";
-}
+        document.getElementById('sensorEventType').textContent = eventType || '--';
+        document.getElementById('sensorMagnitude').textContent = magnitude || '--';
+        document.getElementById('sensorRSSI').textContent = rssi ? rssi + ' dBm' : '--';
+        document.getElementById('sensorLat').textContent = lat || '--';
+        document.getElementById('sensorLon').textContent = lon || '--';
+        document.getElementById('sensorCount').textContent = count || '--';
+        document.getElementById('sensorStatus').textContent = status || '--';
 
-// Fetch latest ThingSpeak data
-async function fetchData() {
-  try {
-    const url = READ_API_KEY
-      ? `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${READ_API_KEY}&results=1`
-      : `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?results=1`;
-    
-    const res = await fetch(url);
-    const data = await res.json();
-    if (!data.feeds || data.feeds.length === 0) return;
+        if (eventType) {
+            addEvent({
+                eventType: eventType,
+                magnitude: magnitude || 0,
+                dateTime: new Date().toLocaleString(),
+                latitude: lat || 0,
+                longitude: lon || 0,
+                locationValid: !!(lat && lon)
+            });
+            showAlert({
+                eventType: eventType,
+                magnitude: magnitude || 0,
+                dateTime: new Date().toLocaleString(),
+                latitude: lat || 0,
+                longitude: lon || 0,
+                locationValid: !!(lat && lon)
+            });
+        }
 
-    const feed = data.feeds[0];
+        document.getElementById('statusText').textContent = status || 'UNKNOWN';
+        document.getElementById('statusDot').classList.add('connected');
 
-    const eventType = feed.field1 || "STATUS";
-    const magnitude = feed.field2 || "0";
-    const lat = feed.field3 || "0";
-    const lon = feed.field4 || "0";
-    const rssi = feed.field5 || "0";
-    const gpsValid = feed.field6 == "1" ? "Yes" : "No";
-    const eventCount = feed.field7 || "0";
-    const status = feed.field8 || "OFFLINE";
-
-    // Only update if new event
-    if (feed.entry_id != lastEventId) {
-      lastEventId = feed.entry_id;
-
-      document.getElementById('buoy-status').textContent = status;
-      document.getElementById('event-type').textContent = eventType;
-      document.getElementById('magnitude').textContent = magnitude;
-      document.getElementById('lat').textContent = lat;
-      document.getElementById('lon').textContent = lon;
-      document.getElementById('rssi').textContent = rssi;
-      document.getElementById('gps-valid').textContent = gpsValid;
-      document.getElementById('event-count').textContent = eventCount;
-
-      const warningEl = document.getElementById('warning');
-      if (eventType === "IMPACT") {
-        warningEl.textContent = "⚠️ IMPACT DETECTED!";
-      } else if (eventType === "DRIFT") {
-        warningEl.textContent = "🌊 DRIFT ALERT!";
-      } else {
-        warningEl.textContent = "";
-      }
+    } catch (e) {
+        console.error('ThingSpeak fetch error', e);
+        document.getElementById('statusText').textContent = 'ERROR';
+        document.getElementById('statusDot').classList.remove('connected');
     }
-  } catch (err) {
-    console.error("Error fetching ThingSpeak data:", err);
-  }
 }
 
-// Refresh every 15 seconds
-fetchData();
-setInterval(fetchData, 15000);
-</script>
+function addEvent(eventData) {
+    events.unshift(eventData);
+    if(events.length>10) events.pop();
+    renderEvents();
+}
 
+function renderEvents() {
+    const eventList = document.getElementById('eventList');
+    if(events.length===0){
+        eventList.innerHTML = '<div class="empty-state"><div class="empty-state-text">No events detected yet</div></div>';
+        return;
+    }
+    let html='';
+    for(let ev of events){
+        html += `<div class="event-item ${ev.eventType.toLowerCase()}">
+        <div class="event-header">
+            <div class="event-type">${ev.eventType}</div>
+            <div class="event-time">${ev.dateTime}</div>
+        </div>
+        <div class="event-details">
+            <div class="event-detail"><strong>Magnitude:</strong> ${ev.magnitude}</div>
+            <div class="event-detail"><strong>Location:</strong> ${ev.locationValid ? ev.latitude.toFixed(6)+', '+ev.longitude.toFixed(6) : 'No GPS fix'}</div>
+        </div>
+        </div>`;
+    }
+    eventList.innerHTML = html;
+}
+
+function showAlert(ev){
+    const alertBanner = document.getElementById('alertBanner');
+    const alertTitle = document.getElementById('alertTitle');
+    const alertMessage = document.getElementById('alertMessage');
+    const lastSeenBoard = document.getElementById('lastSeenBoard');
+
+    alertTitle.textContent = ev.eventType + ' DETECTED';
+    alertMessage.textContent = ev.eventType === 'DRIFT' ? 'Buoy drifted '+ev.magnitude+' meters.' : 'Impact detected!';
+    alertBanner.classList.add('active');
+    lastSeenBoard.classList.add('active');
+
+    document.getElementById('lastEventType').textContent = ev.eventType;
+    document.getElementById('lastEventTime').textContent = ev.dateTime;
+    document.getElementById('lastEventMagnitude').textContent = ev.magnitude;
+    document.getElementById('lastEventLocation').textContent = ev.locationValid ? ev.latitude.toFixed(6)+', '+ev.longitude.toFixed(6) : 'No GPS fix';
+}
+
+function confirmEvent(){
+    document.getElementById('alertBanner').classList.remove('active');
+    currentAlert=null;
+}
+
+function clearEvents(){
+    events=[];
+    renderEvents();
+    document.getElementById('lastSeenBoard').classList.remove('active');
+}
+
+fetchThingSpeak();
+setInterval(fetchThingSpeak, REFRESH_MS);
+</script>
 </body>
 </html>
