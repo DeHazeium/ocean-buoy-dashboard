@@ -6,7 +6,7 @@
     <title>Buoy Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
@@ -24,88 +24,22 @@
             --text-primary: #ffffff;
             --text-secondary: #a0a0a0;
             --text-muted: #666666;
-            --accent: #ffffff;
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --ocean-blue: #0ea5e9;
-            --ocean-teal: #14b8a6;
+            --accent: #0ea5e9;
         }
         
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            overflow-x: hidden;
-            cursor: default;
         }
         
-        /* Animated gradient mesh background */
-        .gradient-mesh {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0.15;
-            pointer-events: none;
-            z-index: 0;
-            background: 
-                radial-gradient(circle at 20% 30%, var(--ocean-blue) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, var(--ocean-teal) 0%, transparent 50%),
-                radial-gradient(circle at 50% 50%, var(--success) 0%, transparent 70%);
-            animation: gradientShift 15s ease infinite;
-        }
-        
-        @keyframes gradientShift {
-            0%, 100% { transform: scale(1) rotate(0deg); }
-            33% { transform: scale(1.1) rotate(5deg); }
-            66% { transform: scale(0.9) rotate(-5deg); }
-        }
-        
-        /* Floating particles */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-        
-        .particle {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: var(--ocean-teal);
-            border-radius: 50%;
-            opacity: 0.3;
-            animation: float 20s linear infinite;
-        }
-        
-        @keyframes float {
-            0% {
-                transform: translateY(100vh) translateX(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.3;
-            }
-            90% {
-                opacity: 0.3;
-            }
-            100% {
-                transform: translateY(-100px) translateX(100px);
-                opacity: 0;
-            }
-        }
-        
-        /* Noise texture */
+        /* Subtle background gradient - no animation */
         body::before {
             content: '';
             position: fixed;
@@ -113,73 +47,32 @@
             left: 0;
             width: 100%;
             height: 100%;
-            opacity: 0.03;
+            background: radial-gradient(circle at 20% 30%, rgba(14, 165, 233, 0.03) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(20, 184, 166, 0.03) 0%, transparent 50%);
             pointer-events: none;
-            z-index: 2;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-        }
-        
-        /* Ripple effect on click */
-        .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(0);
-            animation: rippleEffect 0.6s ease-out;
-            pointer-events: none;
-            z-index: 9999;
-        }
-        
-        @keyframes rippleEffect {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
-        
-        /* Data streaming effect */
-        .data-stream {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-            overflow: hidden;
-        }
-        
-        .stream-line {
-            position: absolute;
-            width: 1px;
-            height: 100px;
-            background: linear-gradient(to bottom, transparent, var(--ocean-teal), transparent);
-            opacity: 0.2;
-            animation: streamFlow 3s linear infinite;
-        }
-        
-        @keyframes streamFlow {
-            from {
-                transform: translateY(-100px);
-            }
-            to {
-                transform: translateY(100vh);
-            }
+            z-index: 0;
         }
         
         .container {
-            max-width: 1800px;
+            max-width: 1600px;
             margin: 0 auto;
-            padding: 60px 40px;
+            padding: 40px 30px;
             position: relative;
-            z-index: 10;
+            z-index: 1;
         }
         
-        /* Fullscreen button */
-        .fullscreen-btn {
+        /* Control buttons */
+        .controls {
             position: fixed;
             bottom: 30px;
             right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 1000;
+        }
+        
+        .control-btn {
             width: 50px;
             height: 50px;
             background: var(--bg-secondary);
@@ -189,90 +82,27 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 1000;
-            transition: all 0.3s ease;
+            transition: all 0.2s;
             font-size: 1.2em;
         }
         
-        .fullscreen-btn:hover {
+        .control-btn:hover {
             background: var(--bg-tertiary);
             border-color: var(--border-hover);
-            transform: scale(1.1);
+            transform: scale(1.05);
         }
         
-        /* Sound toggle */
-        .sound-toggle {
-            position: fixed;
-            bottom: 90px;
-            right: 30px;
-            width: 50px;
-            height: 50px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 1000;
-            transition: all 0.3s ease;
-            font-size: 1.2em;
-        }
-        
-        .sound-toggle:hover {
-            background: var(--bg-tertiary);
-            border-color: var(--border-hover);
-            transform: scale(1.1);
-        }
-        
-        .sound-toggle.active {
+        .control-btn.active {
             background: rgba(16, 185, 129, 0.1);
             border-color: var(--success);
             color: var(--success);
         }
         
-        /* Export button */
-        .export-btn {
-            position: fixed;
-            bottom: 150px;
-            right: 30px;
-            width: 50px;
-            height: 50px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 1000;
-            transition: all 0.3s ease;
-            font-size: 1.2em;
-        }
-        
-        .export-btn:hover {
-            background: var(--bg-tertiary);
-            border-color: var(--border-hover);
-            transform: scale(1.1);
-        }
-        
         /* Header */
         .header {
-            margin-bottom: 60px;
-            padding-bottom: 40px;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
             border-bottom: 1px solid var(--border);
-            animation: fadeIn 0.6s ease-out;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
         
         .header-top {
@@ -283,129 +113,81 @@
         }
         
         .header-title h1 {
-            font-size: 2.5em;
-            font-weight: 800;
-            letter-spacing: -1px;
+            font-size: 2.2em;
+            font-weight: 700;
+            letter-spacing: -0.5px;
             margin-bottom: 8px;
             background: linear-gradient(135deg, #ffffff 0%, #888888 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-            overflow: hidden;
-            white-space: nowrap;
-        }
-        
-        .header-title h1.typing {
-            animation: typing 2s steps(22) 1s both;
-            width: 0;
-        }
-        
-        @keyframes typing {
-            from { width: 0; }
-            to { width: 100%; }
         }
         
         .header-subtitle {
-            font-size: 0.95em;
+            font-size: 0.9em;
             color: var(--text-secondary);
-            font-weight: 500;
-            letter-spacing: 0.3px;
         }
         
         .header-right {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            gap: 12px;
+            gap: 10px;
         }
         
-        .status-container {
+        .status-box {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 20px;
+            gap: 10px;
+            padding: 10px 18px;
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 8px;
-            transition: all 0.3s ease;
         }
         
-        .status-container:hover {
-            border-color: var(--border-hover);
-            background: var(--bg-tertiary);
-        }
-        
-        .status-indicator {
+        .status-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
             background: var(--text-muted);
-            position: relative;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
         
-        .status-indicator.active {
+        .status-dot.active {
             background: var(--success);
-            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            animation: statusPulse 2s infinite;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+            animation: pulse 2s infinite;
         }
         
-        @keyframes statusPulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-            }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
+            50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
         }
         
         .status-text {
             font-size: 0.85em;
             font-weight: 600;
-            letter-spacing: 0.5px;
             font-family: 'JetBrains Mono', monospace;
         }
         
-        /* Real-time clock */
         .live-clock {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85em;
+            padding: 10px 18px;
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 8px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85em;
-            font-weight: 600;
-        }
-        
-        .clock-time {
-            color: var(--text-primary);
-        }
-        
-        .clock-date {
-            color: var(--text-muted);
         }
         
         .header-meta {
             display: flex;
-            gap: 40px;
+            gap: 30px;
             font-size: 0.85em;
             color: var(--text-muted);
         }
         
         .meta-item {
             display: flex;
-            align-items: center;
             gap: 8px;
-        }
-        
-        .meta-label {
-            font-weight: 500;
         }
         
         .meta-value {
@@ -413,282 +195,124 @@
             color: var(--text-secondary);
         }
         
-        /* Network quality bars */
-        .network-quality {
-            display: flex;
-            gap: 3px;
-            align-items: flex-end;
-        }
-        
-        .quality-bar {
-            width: 3px;
-            background: var(--border);
-            border-radius: 2px;
-            transition: all 0.3s ease;
-        }
-        
-        .quality-bar:nth-child(1) { height: 8px; }
-        .quality-bar:nth-child(2) { height: 12px; }
-        .quality-bar:nth-child(3) { height: 16px; }
-        .quality-bar:nth-child(4) { height: 20px; }
-        
-        .quality-bar.active {
-            background: var(--success);
-            animation: barPulse 1.5s ease-in-out infinite;
-        }
-        
-        @keyframes barPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-        
-        /* Main Grid */
+        /* Main grid */
         .main-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
+            gap: 25px;
+            margin-bottom: 25px;
         }
         
-        /* Chart Section */
+        /* Chart section */
         .chart-section {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 32px;
-            animation: slideUp 0.6s ease-out backwards;
-            position: relative;
-            overflow: hidden;
+            padding: 30px;
+            transition: border-color 0.3s;
         }
         
-        .chart-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--ocean-teal), transparent);
-            opacity: 0.3;
+        .chart-section:hover {
+            border-color: var(--border-hover);
         }
         
         .chart-title {
-            font-size: 0.8em;
+            font-size: 0.75em;
             font-weight: 600;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
         
-        /* Primary Stats */
-        .stats-primary {
+        /* Stats grid */
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
+            margin-bottom: 25px;
         }
         
         .stat-card {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 32px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            animation: slideUp 0.6s ease-out backwards;
-        }
-        
-        .stat-card:nth-child(1) { animation-delay: 0.1s; }
-        .stat-card:nth-child(2) { animation-delay: 0.15s; }
-        .stat-card:nth-child(3) { animation-delay: 0.2s; }
-        .stat-card:nth-child(4) { animation-delay: 0.25s; }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            padding: 28px;
+            transition: all 0.2s;
         }
         
         .stat-card:hover {
             border-color: var(--border-hover);
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-        }
-        
-        .stat-card:hover::before {
-            opacity: 0.3;
-        }
-        
-        /* Wave effect on hover */
-        .stat-card::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--ocean-teal);
-            transform: translateX(-100%);
-            transition: transform 0.5s ease;
-        }
-        
-        .stat-card:hover::after {
-            transform: translateX(0);
+            transform: translateY(-2px);
         }
         
         .stat-label {
-            font-size: 0.8em;
+            font-size: 0.75em;
             font-weight: 600;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
         
         .stat-value {
-            font-size: 2.8em;
+            font-size: 2.5em;
             font-weight: 700;
-            letter-spacing: -1.5px;
-            line-height: 1;
-            margin-bottom: 12px;
+            letter-spacing: -1px;
             font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 8px;
         }
         
-        /* Counting animation */
-        .stat-value.counting {
-            animation: countPulse 0.3s ease-out;
-        }
-        
-        @keyframes countPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+        .stat-value.highlight {
+            color: var(--accent);
         }
         
         .stat-unit {
             font-size: 0.85em;
             color: var(--text-secondary);
-            font-weight: 500;
         }
         
-        /* Circular progress */
-        .progress-circle {
-            width: 60px;
-            height: 60px;
-            position: relative;
-            margin-top: 12px;
-        }
-        
-        .progress-circle svg {
-            transform: rotate(-90deg);
-        }
-        
-        .progress-circle-bg {
-            fill: none;
-            stroke: var(--border);
-            stroke-width: 4;
-        }
-        
-        .progress-circle-fill {
-            fill: none;
-            stroke: var(--ocean-teal);
-            stroke-width: 4;
-            stroke-linecap: round;
-            transition: stroke-dashoffset 0.5s ease;
-        }
-        
-        .progress-value {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 0.9em;
-            font-weight: 700;
-            font-family: 'JetBrains Mono', monospace;
-        }
-        
-        /* Status Panel */
+        /* Status panel */
         .status-panel {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 32px;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-            animation: slideUp 0.6s ease-out 0.1s backwards;
+            padding: 30px;
         }
         
         .panel-title {
-            font-size: 0.8em;
+            font-size: 0.75em;
             font-weight: 600;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1.5px;
+            margin-bottom: 20px;
         }
         
         .status-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 0;
+            padding: 14px 0;
             border-bottom: 1px solid var(--border);
-            transition: all 0.3s ease;
-        }
-        
-        .status-item:hover {
-            padding-left: 8px;
-            background: rgba(255, 255, 255, 0.02);
         }
         
         .status-item:last-child {
             border-bottom: none;
-            padding-bottom: 0;
         }
         
         .status-label {
             font-size: 0.9em;
             color: var(--text-secondary);
-            font-weight: 500;
-        }
-        
-        .status-value {
-            font-size: 1em;
-            font-weight: 600;
-            font-family: 'JetBrains Mono', monospace;
-            letter-spacing: -0.3px;
         }
         
         .badge {
-            padding: 6px 12px;
+            padding: 5px 12px;
             border-radius: 6px;
-            font-size: 0.75em;
+            font-size: 0.7em;
             font-weight: 700;
-            letter-spacing: 0.5px;
             text-transform: uppercase;
             font-family: 'JetBrains Mono', monospace;
-            transition: all 0.3s ease;
-        }
-        
-        .badge:hover {
-            transform: scale(1.05);
         }
         
         .badge.success {
@@ -715,54 +339,43 @@
             border: 1px solid var(--border);
         }
         
-        /* Timeline Section */
+        /* Timeline */
         .timeline-section {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 32px;
-            margin-bottom: 30px;
-            animation: slideUp 0.6s ease-out 0.3s backwards;
+            padding: 30px;
+            margin-bottom: 25px;
         }
         
         .timeline-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
-        }
-        
-        .timeline-title {
-            font-size: 0.8em;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
+            margin-bottom: 20px;
         }
         
         .timeline-clear {
-            padding: 6px 16px;
+            padding: 6px 14px;
             background: transparent;
             border: 1px solid var(--border);
             border-radius: 6px;
             color: var(--text-secondary);
-            font-size: 0.75em;
+            font-size: 0.7em;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s;
         }
         
         .timeline-clear:hover {
             background: var(--bg-tertiary);
-            border-color: var(--border-hover);
             color: var(--text-primary);
         }
         
         .timeline {
             position: relative;
-            padding-left: 30px;
+            padding-left: 25px;
         }
         
         .timeline::before {
@@ -772,32 +385,13 @@
             top: 0;
             bottom: 0;
             width: 2px;
-            background: linear-gradient(to bottom, var(--ocean-teal), transparent);
+            background: var(--border);
         }
         
         .timeline-item {
             position: relative;
-            padding: 20px 0;
+            padding: 16px 0;
             border-bottom: 1px solid var(--border);
-            animation: slideInLeft 0.4s ease-out;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        @keyframes slideInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        
-        .timeline-item:hover {
-            background: rgba(255, 255, 255, 0.02);
-            padding-left: 8px;
         }
         
         .timeline-item:last-child {
@@ -807,40 +401,27 @@
         .timeline-item::before {
             content: '';
             position: absolute;
-            left: -35px;
-            top: 25px;
-            width: 12px;
-            height: 12px;
+            left: -30px;
+            top: 22px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            background: var(--ocean-teal);
-            border: 3px solid var(--bg-secondary);
-            box-shadow: 0 0 0 2px var(--ocean-teal);
-            transition: all 0.3s ease;
-        }
-        
-        .timeline-item:hover::before {
-            transform: scale(1.3);
-            box-shadow: 0 0 0 4px var(--ocean-teal);
+            background: var(--accent);
+            border: 2px solid var(--bg-secondary);
         }
         
         .timeline-content {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
         }
         
-        .timeline-event {
-            flex: 1;
-        }
-        
-        .timeline-event-type {
-            font-size: 0.9em;
+        .timeline-type {
             font-weight: 600;
             margin-bottom: 4px;
         }
         
-        .timeline-event-details {
-            font-size: 0.8em;
+        .timeline-details {
+            font-size: 0.85em;
             color: var(--text-secondary);
             font-family: 'JetBrains Mono', monospace;
         }
@@ -853,396 +434,181 @@
         
         .timeline-empty {
             text-align: center;
-            padding: 40px;
+            padding: 30px;
             color: var(--text-muted);
-            font-size: 0.9em;
         }
         
-        /* Secondary Grid */
-        .secondary-grid {
+        /* Data cards */
+        .data-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
         
         .data-card {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 28px;
-            transition: all 0.3s ease;
-            animation: slideUp 0.6s ease-out backwards;
-            position: relative;
-            cursor: pointer;
+            padding: 24px;
+            transition: all 0.2s;
         }
-        
-        .data-card:nth-child(1) { animation-delay: 0.3s; }
-        .data-card:nth-child(2) { animation-delay: 0.35s; }
-        .data-card:nth-child(3) { animation-delay: 0.4s; }
         
         .data-card:hover {
-            border-color: var(--ocean-teal);
+            border-color: var(--accent);
             transform: translateY(-2px);
-            box-shadow: 0 0 20px rgba(14, 165, 233, 0.2);
-        }
-        
-        /* Card flip effect */
-        .data-card.flipped .card-front {
-            transform: rotateY(180deg);
-        }
-        
-        .data-card.flipped .card-back {
-            transform: rotateY(0deg);
-        }
-        
-        .card-front, .card-back {
-            transition: transform 0.6s;
-            backface-visibility: hidden;
-        }
-        
-        .card-back {
-            position: absolute;
-            inset: 0;
-            padding: 28px;
-            transform: rotateY(180deg);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            background: var(--bg-secondary);
-            border-radius: 12px;
         }
         
         .data-label {
-            font-size: 0.8em;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 12px;
-        }
-        
-        .data-value {
-            font-size: 2em;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            font-family: 'JetBrains Mono', monospace;
-        }
-        
-        .data-subtext {
-            font-size: 0.85em;
-            color: var(--text-secondary);
-            margin-top: 8px;
-        }
-        
-        /* Mini sparkline */
-        .mini-sparkline {
-            height: 40px;
-            margin-top: 12px;
-        }
-        
-        /* Location Card */
-        .location-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 32px;
-            margin-bottom: 30px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            animation: slideUp 0.6s ease-out 0.45s backwards;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        /* Water ripple effect */
-        .location-card::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(14, 165, 233, 0.2) 0%, transparent 70%);
-            transform: translate(-50%, -50%);
-            opacity: 0;
-            transition: all 0.6s ease;
-        }
-        
-        .location-card:hover::before {
-            width: 200%;
-            height: 200%;
-            opacity: 1;
-        }
-        
-        .location-item {
-            position: relative;
-            z-index: 1;
-        }
-        
-        .location-item::before {
-            content: '';
-            position: absolute;
-            left: -20px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 3px;
-            height: 40px;
-            background: linear-gradient(to bottom, transparent, var(--ocean-teal), transparent);
-            opacity: 0.5;
-        }
-        
-        .location-label {
             font-size: 0.75em;
             font-weight: 600;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
         
-        .location-value {
+        .data-value {
             font-size: 1.8em;
             font-weight: 700;
             font-family: 'JetBrains Mono', monospace;
-            letter-spacing: -0.5px;
-            color: var(--text-primary);
         }
         
-        /* Ocean wave at bottom */
-        .ocean-wave {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100px;
-            pointer-events: none;
-            z-index: 5;
-            opacity: 0.1;
-        }
-        
-        .wave {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 200%;
-            height: 100%;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z' opacity='.25' fill='%230ea5e9'/%3E%3Cpath d='M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z' opacity='.5' fill='%230ea5e9'/%3E%3Cpath d='M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z' fill='%230ea5e9'/%3E%3C/svg%3E");
-            background-size: 50% 100%;
-            animation: wave 20s linear infinite;
-        }
-        
-        @keyframes wave {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-        
-        .wave:nth-child(2) {
-            bottom: 10px;
-            animation: wave 15s linear reverse infinite;
-            opacity: 0.5;
-        }
-        
-        /* Floating buoy icon */
-        .floating-buoy {
-            position: fixed;
-            bottom: 120px;
-            left: 30px;
-            font-size: 2em;
-            animation: buoyFloat 3s ease-in-out infinite;
-            z-index: 100;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-        }
-        
-        @keyframes buoyFloat {
-            0%, 100% { transform: translateY(0) rotate(-5deg); }
-            50% { transform: translateY(-15px) rotate(5deg); }
-        }
-        
-        /* Footer */
-        .footer {
-            margin-top: 60px;
-            padding-top: 30px;
-            border-top: 1px solid var(--border);
-            text-align: center;
+        .data-subtext {
             font-size: 0.8em;
-            color: var(--text-muted);
-            letter-spacing: 0.5px;
-        }
-        
-        .footer a {
             color: var(--text-secondary);
-            text-decoration: none;
-            transition: color 0.3s ease;
+            margin-top: 6px;
         }
         
-        .footer a:hover {
-            color: var(--ocean-teal);
+        /* Location card */
+        .location-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
         }
         
-        .footer-refresh {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 8px;
+        .location-label {
+            font-size: 0.7em;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 10px;
         }
         
-        .refresh-dot {
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            background: var(--success);
-            animation: blink 2s infinite;
+        .location-value {
+            font-size: 1.6em;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
         }
         
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-        
-        /* Notification System */
-        .notification-container {
+        /* Notifications */
+        .notifications {
             position: fixed;
-            top: 30px;
-            right: 30px;
+            top: 20px;
+            right: 20px;
             z-index: 2000;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            max-width: 400px;
+            gap: 10px;
+            max-width: 350px;
         }
         
         .notification {
             background: var(--bg-secondary);
             border: 1px solid var(--border-hover);
             border-radius: 8px;
-            padding: 16px 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            padding: 14px 18px;
             display: flex;
-            align-items: flex-start;
             gap: 12px;
-            animation: slideInRight 0.4s ease-out;
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
         
         .notification.hiding {
-            animation: slideOutRight 0.4s ease-out;
+            animation: slideOut 0.3s ease;
         }
         
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(100px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        
-        @keyframes slideOutRight {
-            from {
-                opacity: 1;
-                transform: translateX(0);
-            }
+        @keyframes slideOut {
             to {
                 opacity: 0;
-                transform: translateX(100px);
+                transform: translateX(50px);
             }
         }
         
         .notification-icon {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
-            flex-shrink: 0;
             margin-top: 6px;
-            animation: notificationPulse 2s infinite;
         }
         
-        @keyframes notificationPulse {
-            0%, 100% {
-                box-shadow: 0 0 0 0 currentColor;
-            }
-            50% {
-                box-shadow: 0 0 0 4px transparent;
-            }
-        }
-        
-        .notification.success .notification-icon {
-            background: var(--success);
-            color: var(--success);
-        }
-        
-        .notification.warning .notification-icon {
-            background: var(--warning);
-            color: var(--warning);
-        }
-        
-        .notification.info .notification-icon {
-            background: var(--ocean-teal);
-            color: var(--ocean-teal);
-        }
-        
-        .notification-content {
-            flex: 1;
-        }
+        .notification.success .notification-icon { background: var(--success); }
+        .notification.warning .notification-icon { background: var(--warning); }
+        .notification.info .notification-icon { background: var(--accent); }
         
         .notification-title {
             font-size: 0.85em;
             font-weight: 600;
-            margin-bottom: 4px;
-            letter-spacing: 0.3px;
+            margin-bottom: 3px;
         }
         
         .notification-message {
-            font-size: 0.8em;
+            font-size: 0.75em;
             color: var(--text-secondary);
             font-family: 'JetBrains Mono', monospace;
         }
         
         .notification-close {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-            background: transparent;
+            margin-left: auto;
+            background: none;
             border: none;
             color: var(--text-muted);
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             font-size: 1.2em;
-            line-height: 1;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
         }
         
         .notification-close:hover {
-            background: var(--bg-tertiary);
             color: var(--text-primary);
         }
         
-        /* Value change animation */
-        .value-changed {
-            animation: valueHighlight 0.6s ease-out;
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            padding-top: 25px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 0.8em;
+            color: var(--text-muted);
         }
         
-        @keyframes valueHighlight {
-            0% {
-                background: rgba(14, 165, 233, 0.2);
-                transform: scale(1.05);
-            }
-            100% {
-                background: transparent;
-                transform: scale(1);
-            }
+        .footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .footer a:hover {
+            color: var(--accent);
         }
         
         /* Loading */
-        .loading-overlay {
+        .loading {
             position: fixed;
             inset: 0;
             background: var(--bg-primary);
@@ -1250,37 +616,37 @@
             align-items: center;
             justify-content: center;
             z-index: 10000;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.3s;
         }
         
-        .loading-overlay.hidden {
+        .loading.hidden {
             opacity: 0;
             pointer-events: none;
         }
         
-        .loading-content {
-            text-align: center;
-        }
-        
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
+        .spinner {
+            width: 50px;
+            height: 50px;
             border: 3px solid var(--border);
-            border-top-color: var(--ocean-teal);
+            border-top-color: var(--accent);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            animation: spin 0.8s linear infinite;
         }
         
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
         
-        .loading-text {
-            font-family: 'JetBrains Mono', monospace;
-            color: var(--text-secondary);
-            font-size: 0.9em;
-            letter-spacing: 1px;
+        /* Value changed effect */
+        .value-changed {
+            animation: highlight 0.4s ease;
+        }
+        
+        @keyframes highlight {
+            50% {
+                background: rgba(14, 165, 233, 0.1);
+                transform: scale(1.02);
+            }
         }
         
         /* Responsive */
@@ -1288,133 +654,88 @@
             .main-grid {
                 grid-template-columns: 1fr;
             }
-            
-            .stats-primary {
+            .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
         
         @media (max-width: 768px) {
             .container {
-                padding: 30px 20px;
+                padding: 20px 15px;
             }
-            
             .header-top {
                 flex-direction: column;
-                gap: 20px;
+                gap: 15px;
             }
-            
             .header-title h1 {
-                font-size: 2em;
+                font-size: 1.8em;
             }
-            
             .header-meta {
                 flex-direction: column;
-                gap: 12px;
+                gap: 10px;
             }
-            
-            .stats-primary {
+            .stats-grid,
+            .data-grid {
                 grid-template-columns: 1fr;
             }
-            
-            .secondary-grid {
-                grid-template-columns: 1fr;
-            }
-            
             .location-card {
                 grid-template-columns: 1fr;
-                gap: 30px;
             }
-            
-            .stat-value {
-                font-size: 2.2em;
-            }
-            
-            .notification-container {
-                right: 20px;
-                left: 20px;
+            .notifications {
+                left: 15px;
+                right: 15px;
                 max-width: none;
             }
-            
-            .fullscreen-btn,
-            .sound-toggle,
-            .export-btn {
-                right: 20px;
-            }
-            
-            .floating-buoy {
-                left: 20px;
+            .controls {
+                right: 15px;
+                bottom: 15px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Background Effects -->
-    <div class="gradient-mesh"></div>
-    <div class="particles" id="particles"></div>
-    <div class="data-stream" id="dataStream"></div>
-    
-    <!-- Ocean Wave -->
-    <div class="ocean-wave">
-        <div class="wave"></div>
-        <div class="wave"></div>
+    <!-- Loading -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
     </div>
     
-    <!-- Floating Buoy -->
-    <div class="floating-buoy">🌊</div>
+    <!-- Notifications -->
+    <div class="notifications" id="notifications"></div>
     
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <div class="loading-text">Connecting to ocean buoy...</div>
-        </div>
+    <!-- Controls -->
+    <div class="controls">
+        <div class="control-btn" id="soundBtn" title="Toggle Sound">🔇</div>
+        <div class="control-btn" id="exportBtn" title="Export Data">⬇</div>
+        <div class="control-btn" id="fullscreenBtn" title="Fullscreen">⛶</div>
     </div>
-    
-    <!-- Notification Container -->
-    <div class="notification-container" id="notificationContainer"></div>
-    
-    <!-- Control Buttons -->
-    <div class="fullscreen-btn" id="fullscreenBtn" title="Toggle Fullscreen">⛶</div>
-    <div class="sound-toggle" id="soundToggle" title="Toggle Sound">🔇</div>
-    <div class="export-btn" id="exportBtn" title="Export Data">⬇</div>
     
     <div class="container">
         <!-- Header -->
         <header class="header">
             <div class="header-top">
                 <div class="header-title">
-                    <h1 class="typing">ESP32 Based Buoy Monitor</h1>
+                    <h1>ESP32-Based Buoy Monitor</h1>
                     <div class="header-subtitle">Real-time environmental data tracking</div>
                 </div>
                 <div class="header-right">
-                    <div class="status-container">
-                        <div class="status-indicator" id="statusIndicator"></div>
-                        <span class="status-text" id="connectionText">CONNECTING</span>
-                        <div class="network-quality">
-                            <div class="quality-bar"></div>
-                            <div class="quality-bar"></div>
-                            <div class="quality-bar"></div>
-                            <div class="quality-bar"></div>
-                        </div>
+                    <div class="status-box">
+                        <div class="status-dot" id="statusDot"></div>
+                        <span class="status-text" id="statusText">CONNECTING</span>
                     </div>
-                    <div class="live-clock">
-                        <span class="clock-time" id="clockTime">--:--:--</span>
-                        <span class="clock-date" id="clockDate">--- -- ----</span>
-                    </div>
+                    <div class="live-clock" id="clock">--:--:--</div>
                 </div>
             </div>
             <div class="header-meta">
                 <div class="meta-item">
-                    <span class="meta-label">Channel ID:</span>
+                    <span>Channel:</span>
                     <span class="meta-value">3203006</span>
                 </div>
                 <div class="meta-item">
-                    <span class="meta-label">Last Update:</span>
+                    <span>Last Update:</span>
                     <span class="meta-value" id="lastUpdate">--:--:--</span>
                 </div>
                 <div class="meta-item">
-                    <span class="meta-label">Refresh Rate:</span>
+                    <span>Refresh:</span>
                     <span class="meta-value">20s</span>
                 </div>
             </div>
@@ -1422,148 +743,107 @@
         
         <!-- Main Grid -->
         <div class="main-grid">
-            <!-- Chart Section -->
+            <!-- Chart -->
             <div class="chart-section">
-                <div class="chart-title">Magnitude Trend (Last 20 readings)</div>
-                <canvas id="magnitudeChart"></canvas>
+                <div class="chart-title">Magnitude Trend (Last 15 readings)</div>
+                <canvas id="chart" height="80"></canvas>
             </div>
             
             <!-- Status Panel -->
             <div class="status-panel">
-                <div class="panel-title">System Overview</div>
+                <div class="panel-title">System Status</div>
                 <div class="status-item">
-                    <span class="status-label">Operational Status</span>
-                    <span class="status-value" id="operationalStatus">
-                        <span class="badge neutral">UNKNOWN</span>
-                    </span>
+                    <span class="status-label">Operational</span>
+                    <span id="opStatus"><span class="badge neutral">UNKNOWN</span></span>
                 </div>
                 <div class="status-item">
                     <span class="status-label">GPS Lock</span>
-                    <span class="status-value" id="gpsLock">
-                        <span class="badge neutral">CHECKING</span>
-                    </span>
+                    <span id="gpsStatus"><span class="badge neutral">CHECKING</span></span>
                 </div>
                 <div class="status-item">
-                    <span class="status-label">Data Quality</span>
-                    <span class="status-value">
-                        <span class="badge success">EXCELLENT</span>
-                    </span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">Signal Quality</span>
-                    <span class="status-value" id="signalQuality">
-                        <div class="progress-circle">
-                            <svg width="60" height="60">
-                                <circle class="progress-circle-bg" cx="30" cy="30" r="26"></circle>
-                                <circle class="progress-circle-fill" cx="30" cy="30" r="26" id="signalProgress"></circle>
-                            </svg>
-                            <div class="progress-value" id="signalPercent">0%</div>
-                        </div>
-                    </span>
+                    <span class="status-label">Connection</span>
+                    <span><span class="badge success">STABLE</span></span>
                 </div>
             </div>
         </div>
         
-        <!-- Primary Stats -->
-        <div class="stats-primary">
+        <!-- Stats -->
+        <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-label">Event Counter</div>
-                <div class="stat-value" id="eventCounter">--</div>
+                <div class="stat-value" id="eventCount">--</div>
                 <div class="stat-unit">Total detections</div>
             </div>
             
             <div class="stat-card">
                 <div class="stat-label">Signal Strength</div>
-                <div class="stat-value" id="rssiValue">--</div>
+                <div class="stat-value" id="rssi">--</div>
                 <div class="stat-unit">dBm</div>
-                <canvas class="mini-sparkline" id="rssiSparkline"></canvas>
             </div>
             
             <div class="stat-card">
                 <div class="stat-label">Magnitude</div>
-                <div class="stat-value" id="magnitudeValue">--</div>
-                <div class="stat-unit">Measurement</div>
+                <div class="stat-value highlight" id="magnitude">--</div>
+                <div class="stat-unit">Current reading</div>
             </div>
             
             <div class="stat-card">
                 <div class="stat-label">Last Event</div>
-                <div class="stat-value" id="lastEvent">--</div>
+                <div class="stat-value highlight" id="lastEvent">--</div>
                 <div class="stat-unit">Event type</div>
             </div>
         </div>
         
-        <!-- Timeline Section -->
+        <!-- Timeline -->
         <div class="timeline-section">
             <div class="timeline-header">
-                <div class="timeline-title">Event Timeline</div>
-                <button class="timeline-clear" id="clearTimeline">Clear All</button>
+                <div class="chart-title">Event Timeline</div>
+                <button class="timeline-clear" id="clearBtn">Clear</button>
             </div>
             <div class="timeline" id="timeline">
-                <div class="timeline-empty">No events recorded yet</div>
+                <div class="timeline-empty">No events recorded</div>
             </div>
         </div>
         
-        <!-- Secondary Grid -->
-        <div class="secondary-grid">
-            <div class="data-card" onclick="toggleCard(this)">
-                <div class="card-front">
-                    <div class="data-label">Buoy Status</div>
-                    <div class="data-value" id="buoyStatus">--</div>
-                    <div class="data-subtext">Current operational mode</div>
-                </div>
-                <div class="card-back">
-                    <div class="data-label">Additional Info</div>
-                    <div class="data-subtext" style="margin-top: 0;">Click to flip back</div>
-                </div>
+        <!-- Data Cards -->
+        <div class="data-grid">
+            <div class="data-card">
+                <div class="data-label">Buoy Status</div>
+                <div class="data-value" id="buoyStatus">--</div>
+                <div class="data-subtext">Operational mode</div>
             </div>
             
-            <div class="data-card" onclick="toggleCard(this)">
-                <div class="card-front">
-                    <div class="data-label">GPS Satellites</div>
-                    <div class="data-value" id="gpsValid">--</div>
-                    <div class="data-subtext">Position validity</div>
-                </div>
-                <div class="card-back">
-                    <div class="data-label">GPS Details</div>
-                    <div class="data-subtext" style="margin-top: 0;">Valid position lock required for accurate tracking</div>
-                </div>
+            <div class="data-card">
+                <div class="data-label">GPS Valid</div>
+                <div class="data-value" id="gpsValid">--</div>
+                <div class="data-subtext">Position lock</div>
             </div>
             
-            <div class="data-card" onclick="toggleCard(this)">
-                <div class="card-front">
-                    <div class="data-label">Network Status</div>
-                    <div class="data-value" id="networkStatus">ACTIVE</div>
-                    <div class="data-subtext">Connection quality</div>
-                </div>
-                <div class="card-back">
-                    <div class="data-label">Network Info</div>
-                    <div class="data-subtext" style="margin-top: 0;">Stable ThingSpeak connection maintained</div>
-                </div>
+            <div class="data-card">
+                <div class="data-label">Network</div>
+                <div class="data-value">ACTIVE</div>
+                <div class="data-subtext">Connection stable</div>
             </div>
         </div>
         
-        <!-- Location Card -->
+        <!-- Location -->
         <div class="location-card">
-            <div class="location-item">
-                <div class="location-label">◆ Latitude</div>
-                <div class="location-value" id="latitudeValue">--°</div>
+            <div>
+                <div class="location-label">Latitude</div>
+                <div class="location-value" id="lat">--°</div>
             </div>
-            <div class="location-item">
-                <div class="location-label">◆ Longitude</div>
-                <div class="location-value" id="longitudeValue">--°</div>
+            <div>
+                <div class="location-label">Longitude</div>
+                <div class="location-value" id="lon">--°</div>
             </div>
         </div>
         
         <!-- Footer -->
         <footer class="footer">
-            <div style="margin-bottom: 12px;">
+            <div style="margin-bottom: 8px;">
                 <strong>Muhammad Irfan</strong> · <a href="https://instagram.com/hzetronics" target="_blank">@Hzetronics</a>
             </div>
             <div>Powered by ThingSpeak API</div>
-            <div class="footer-refresh">
-                <div class="refresh-dot"></div>
-                <span>Auto-refresh enabled</span>
-            </div>
         </footer>
     </div>
 
@@ -1572,466 +852,202 @@
         const READ_API_KEY = "JN2TR7S7XJLS9TWW";
         const REFRESH_MS = 20000;
         
-        let firstLoad = true;
-        let previousData = {};
-        let soundEnabled = false;
+        let chart, prevData = {}, timeline = [], soundOn = false, firstLoad = true;
         let magnitudeHistory = [];
-        let rssiHistory = [];
-        let timeline = [];
-        let magnitudeChart, rssiSparkline;
         
-        // Audio context for sound effects
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        
-        function playBeep(frequency = 800, duration = 100) {
-            if (!soundEnabled) return;
-            
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.value = frequency;
-            oscillator.type = 'sine';
-            
-            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + duration / 1000);
-        }
-        
-        // Initialize particles
-        function createParticles() {
-            const container = document.getElementById('particles');
-            for (let i = 0; i < 30; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 20 + 's';
-                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
-                container.appendChild(particle);
+        // Initialize chart
+        chart = new Chart(document.getElementById('chart'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    data: [],
+                    borderColor: '#0ea5e9',
+                    backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { 
+                        grid: { color: '#2a2a2a' },
+                        ticks: { color: '#666' }
+                    },
+                    y: { 
+                        grid: { color: '#2a2a2a' },
+                        ticks: { color: '#666' }
+                    }
+                }
             }
-        }
-        
-        // Create data stream lines
-        function createDataStream() {
-            const container = document.getElementById('dataStream');
-            for (let i = 0; i < 5; i++) {
-                const line = document.createElement('div');
-                line.className = 'stream-line';
-                line.style.left = (i * 20 + 10) + '%';
-                line.style.animationDelay = (i * 0.6) + 's';
-                container.appendChild(line);
-            }
-        }
-        
-        // Ripple effect on click
-        document.body.addEventListener('click', function(e) {
-            const ripple = document.createElement('div');
-            ripple.className = 'ripple';
-            ripple.style.left = e.clientX + 'px';
-            ripple.style.top = e.clientY + 'px';
-            ripple.style.width = ripple.style.height = '20px';
-            document.body.appendChild(ripple);
-            
-            setTimeout(() => ripple.remove(), 600);
         });
         
-        // Live clock
-        function updateClock() {
+        // Clock
+        setInterval(() => {
             const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
-            const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            
-            document.getElementById('clockTime').textContent = timeStr;
-            document.getElementById('clockDate').textContent = dateStr;
+            document.getElementById('clock').textContent = 
+                now.toLocaleTimeString('en-US', { hour12: false });
+        }, 1000);
+        
+        // Sound
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function beep(freq = 800, dur = 80) {
+            if (!soundOn) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur/1000);
+            osc.start();
+            osc.stop(audioCtx.currentTime + dur/1000);
         }
         
-        setInterval(updateClock, 1000);
-        updateClock();
+        // Controls
+        document.getElementById('soundBtn').onclick = function() {
+            soundOn = !soundOn;
+            this.classList.toggle('active');
+            this.textContent = soundOn ? '🔊' : '🔇';
+            if (soundOn) beep(600);
+        };
         
-        // Fullscreen toggle
-        document.getElementById('fullscreenBtn').addEventListener('click', function() {
+        document.getElementById('exportBtn').onclick = function() {
+            const data = { timestamp: new Date().toISOString(), current: prevData, timeline };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `buoy-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            notify('Data Exported', 'File saved successfully', 'success');
+        };
+        
+        document.getElementById('fullscreenBtn').onclick = function() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen();
             } else {
                 document.exitFullscreen();
             }
-        });
+        };
         
-        // Sound toggle
-        document.getElementById('soundToggle').addEventListener('click', function() {
-            soundEnabled = !soundEnabled;
-            this.classList.toggle('active');
-            this.textContent = soundEnabled ? '🔊' : '🔇';
-            if (soundEnabled) {
-                playBeep(600, 50);
-            }
-        });
-        
-        // Export data
-        document.getElementById('exportBtn').addEventListener('click', function() {
-            const exportData = {
-                timestamp: new Date().toISOString(),
-                currentData: previousData,
-                timeline: timeline,
-                magnitudeHistory: magnitudeHistory,
-                rssiHistory: rssiHistory
-            };
-            
-            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `buoy-data-${Date.now()}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            
-            showNotification('Data Exported', 'Dashboard data saved successfully', 'success');
-            playBeep(1000, 100);
-        });
-        
-        // Initialize charts
-        function initCharts() {
-            const chartOptions = {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    x: {
-                        display: true,
-                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                        ticks: { color: '#666666' }
-                    },
-                    y: {
-                        display: true,
-                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                        ticks: { color: '#666666' }
-                    }
-                }
-            };
-            
-            magnitudeChart = new Chart(document.getElementById('magnitudeChart'), {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Magnitude',
-                        data: [],
-                        borderColor: '#14b8a6',
-                        backgroundColor: 'rgba(20, 184, 166, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    }]
-                },
-                options: chartOptions
-            });
-            
-            rssiSparkline = new Chart(document.getElementById('rssiSparkline'), {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        data: [],
-                        borderColor: '#0ea5e9',
-                        borderWidth: 2,
-                        fill: false,
-                        tension: 0.4,
-                        pointRadius: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { display: false },
-                        y: { display: false }
-                    }
-                }
-            });
-        }
-        
-        function updateCharts() {
-            if (magnitudeHistory.length > 20) {
-                magnitudeHistory.shift();
-            }
-            if (rssiHistory.length > 20) {
-                rssiHistory.shift();
-            }
-            
-            magnitudeChart.data.labels = magnitudeHistory.map((_, i) => i + 1);
-            magnitudeChart.data.datasets[0].data = magnitudeHistory;
-            magnitudeChart.update('none');
-            
-            rssiSparkline.data.labels = rssiHistory.map((_, i) => i + 1);
-            rssiSparkline.data.datasets[0].data = rssiHistory;
-            rssiSparkline.update('none');
-        }
-        
-        // Update network quality bars
-        function updateNetworkQuality(rssi) {
-            const bars = document.querySelectorAll('.quality-bar');
-            let activeCount = 0;
-            
-            if (rssi > -60) activeCount = 4;
-            else if (rssi > -70) activeCount = 3;
-            else if (rssi > -80) activeCount = 2;
-            else if (rssi > -90) activeCount = 1;
-            
-            bars.forEach((bar, i) => {
-                if (i < activeCount) {
-                    bar.classList.add('active');
-                } else {
-                    bar.classList.remove('active');
-                }
-            });
-        }
-        
-        // Update signal quality circle
-        function updateSignalQuality(rssi) {
-            const percent = Math.max(0, Math.min(100, ((rssi + 100) / 50) * 100));
-            const circle = document.getElementById('signalProgress');
-            const circumference = 2 * Math.PI * 26;
-            const offset = circumference - (percent / 100) * circumference;
-            
-            circle.style.strokeDasharray = circumference;
-            circle.style.strokeDashoffset = offset;
-            
-            document.getElementById('signalPercent').textContent = Math.round(percent) + '%';
-        }
-        
-        // Card flip
-        function toggleCard(card) {
-            card.classList.toggle('flipped');
-        }
-        
-        // Timeline management
-        function addTimelineEvent(eventData) {
-            timeline.unshift({
-                ...eventData,
-                timestamp: new Date().toISOString()
-            });
-            
-            if (timeline.length > 10) {
-                timeline.pop();
-            }
-            
+        document.getElementById('clearBtn').onclick = function() {
+            timeline = [];
             renderTimeline();
+            notify('Timeline Cleared', 'All events removed', 'info');
+        };
+        
+        // Notification
+        function notify(title, msg, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `notification ${type}`;
+            div.innerHTML = `
+                <div class="notification-icon"></div>
+                <div>
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${msg}</div>
+                </div>
+                <button class="notification-close" onclick="this.parentElement.remove()">×</button>
+            `;
+            document.getElementById('notifications').appendChild(div);
+            
+            beep(type === 'success' ? 1000 : type === 'warning' ? 600 : 800);
+            
+            setTimeout(() => {
+                div.classList.add('hiding');
+                setTimeout(() => div.remove(), 300);
+            }, 4000);
         }
         
+        // Highlight
+        function highlight(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.remove('value-changed');
+                void el.offsetWidth;
+                el.classList.add('value-changed');
+                setTimeout(() => el.classList.remove('value-changed'), 400);
+            }
+        }
+        
+        // Timeline
         function renderTimeline() {
-            const container = document.getElementById('timeline');
-            
+            const div = document.getElementById('timeline');
             if (timeline.length === 0) {
-                container.innerHTML = '<div class="timeline-empty">No events recorded yet</div>';
+                div.innerHTML = '<div class="timeline-empty">No events recorded</div>';
                 return;
             }
-            
-            container.innerHTML = timeline.map(event => `
+            div.innerHTML = timeline.map(e => `
                 <div class="timeline-item">
                     <div class="timeline-content">
-                        <div class="timeline-event">
-                            <div class="timeline-event-type">${event.eventType}</div>
-                            <div class="timeline-event-details">Magnitude: ${event.magnitude}</div>
+                        <div>
+                            <div class="timeline-type">${e.type}</div>
+                            <div class="timeline-details">Magnitude: ${e.mag}</div>
                         </div>
-                        <div class="timeline-time">${new Date(event.timestamp).toLocaleTimeString()}</div>
+                        <div class="timeline-time">${new Date(e.time).toLocaleTimeString()}</div>
                     </div>
                 </div>
             `).join('');
         }
         
-        document.getElementById('clearTimeline').addEventListener('click', function() {
-            timeline = [];
-            renderTimeline();
-            showNotification('Timeline Cleared', 'All event history has been removed', 'info');
-        });
-        
-        // Counting animation
-        function animateValue(elementId, start, end, duration = 500) {
-            const element = document.getElementById(elementId);
-            const range = end - start;
-            const increment = range / (duration / 16);
-            let current = start;
-            
-            element.classList.add('counting');
-            
-            const timer = setInterval(() => {
-                current += increment;
-                if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
-                    current = end;
-                    clearInterval(timer);
-                    element.classList.remove('counting');
-                }
-                element.textContent = Math.round(current);
-            }, 16);
-        }
-        
-        // Notification System
-        function showNotification(title, message, type = 'info') {
-            const container = document.getElementById('notificationContainer');
-            
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            
-            notification.innerHTML = `
-                <div class="notification-icon"></div>
-                <div class="notification-content">
-                    <div class="notification-title">${title}</div>
-                    <div class="notification-message">${message}</div>
-                </div>
-                <button class="notification-close" onclick="this.parentElement.remove()">×</button>
-            `;
-            
-            container.appendChild(notification);
-            
-            // Play sound
-            if (type === 'success') playBeep(1000, 100);
-            else if (type === 'warning') playBeep(600, 150);
-            else playBeep(800, 80);
-            
-            // Auto remove after 5 seconds
-            setTimeout(() => {
-                notification.classList.add('hiding');
-                setTimeout(() => {
-                    if (notification.parentElement) {
-                        notification.remove();
-                    }
-                }, 400);
-            }, 5000);
-        }
-        
-        // Highlight element when value changes
-        function highlightChange(elementId) {
-            const element = document.getElementById(elementId);
-            if (element) {
-                element.classList.remove('value-changed');
-                void element.offsetWidth;
-                element.classList.add('value-changed');
-                setTimeout(() => {
-                    element.classList.remove('value-changed');
-                }, 600);
-            }
-        }
-        
-        // Check for changes and show notifications
-        function checkForChanges(data) {
-            if (Object.keys(previousData).length === 0) {
-                previousData = { ...data };
+        // Check changes
+        function checkChanges(data) {
+            if (!Object.keys(prevData).length) {
+                prevData = {...data};
                 return;
             }
             
-            // Check event type change
-            if (data.eventType !== previousData.eventType && data.eventType !== 'NONE') {
-                showNotification(
-                    'New Event Detected',
-                    `Event type: ${data.eventType}`,
-                    'warning'
-                );
-                highlightChange('lastEvent');
-                addTimelineEvent(data);
+            if (data.eventType !== prevData.eventType && data.eventType !== 'NONE') {
+                notify('New Event', `Type: ${data.eventType}`, 'warning');
+                highlight('lastEvent');
+                timeline.unshift({ type: data.eventType, mag: data.magnitude, time: Date.now() });
+                if (timeline.length > 10) timeline.pop();
+                renderTimeline();
             }
             
-            // Check status change
-            if (data.status !== previousData.status) {
-                const statusType = (data.status === 'DEPLOYED' || data.status === 'ONLINE') ? 'success' : 'warning';
-                showNotification(
-                    'Status Update',
-                    `Status changed to: ${data.status}`,
-                    statusType
-                );
-                highlightChange('buoyStatus');
+            if (data.status !== prevData.status) {
+                const type = (data.status === 'DEPLOYED' || data.status === 'ONLINE') ? 'success' : 'warning';
+                notify('Status Change', `Now: ${data.status}`, type);
+                highlight('buoyStatus');
             }
             
-            // Check event counter increase
-            if (parseInt(data.count) > parseInt(previousData.count || 0)) {
-                const prevCount = parseInt(previousData.count || 0);
-                const newCount = parseInt(data.count);
-                animateValue('eventCounter', prevCount, newCount);
-                showNotification(
-                    'Event Counter Updated',
-                    `Total events: ${data.count}`,
-                    'info'
-                );
+            if (parseInt(data.count) > parseInt(prevData.count || 0)) {
+                notify('Counter Update', `Total: ${data.count}`, 'info');
+                highlight('eventCount');
             }
             
-            // Check GPS lock change
-            if (data.gpsValid !== previousData.gpsValid) {
-                const gpsType = data.gpsValid === '1' ? 'success' : 'warning';
-                const gpsMessage = data.gpsValid === '1' ? 'GPS lock acquired' : 'GPS lock lost';
-                showNotification(
-                    'GPS Status Change',
-                    gpsMessage,
-                    gpsType
-                );
-                highlightChange('gpsLock');
+            if (data.gpsValid !== prevData.gpsValid) {
+                notify('GPS Status', data.gpsValid === '1' ? 'Lock acquired' : 'Lock lost', 
+                    data.gpsValid === '1' ? 'success' : 'warning');
+                highlight('gpsStatus');
             }
             
-            // Check significant magnitude change
-            const prevMagnitude = parseFloat(previousData.magnitude || 0);
-            const newMagnitude = parseFloat(data.magnitude || 0);
-            if (Math.abs(newMagnitude - prevMagnitude) > 1.0) {
-                showNotification(
-                    'Magnitude Change',
-                    `New reading: ${data.magnitude}`,
-                    'info'
-                );
-                highlightChange('magnitudeValue');
-            }
-            
-            // Check RSSI change
-            const prevRSSI = parseFloat(previousData.rssi || 0);
-            const newRSSI = parseFloat(data.rssi || 0);
-            if (Math.abs(newRSSI - prevRSSI) > 5) {
-                const rssiType = newRSSI > prevRSSI ? 'success' : 'warning';
-                showNotification(
-                    'Signal Strength Change',
-                    `RSSI: ${data.rssi} dBm`,
-                    rssiType
-                );
-                highlightChange('rssiValue');
-            }
-            
-            previousData = { ...data };
+            prevData = {...data};
         }
-
+        
+        // Fetch data
         async function fetchData() {
-            const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json?api_key=${READ_API_KEY}`;
-
             try {
-                const res = await fetch(url);
-                
-                if (!res.ok) {
-                    throw new Error('Network error');
-                }
-                
+                const res = await fetch(`https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json?api_key=${READ_API_KEY}`);
                 const data = await res.json();
                 
-                // Hide loading overlay on first load
                 if (firstLoad) {
                     setTimeout(() => {
-                        document.getElementById('loadingOverlay').classList.add('hidden');
-                        showNotification(
-                            'Connection Established',
-                            'Dashboard connected to ThingSpeak',
-                            'success'
-                        );
-                    }, 1500);
+                        document.getElementById('loading').classList.add('hidden');
+                        notify('Connected', 'Dashboard online', 'success');
+                    }, 1000);
                     firstLoad = false;
                 }
                 
-                // Update connection status
-                document.getElementById('statusIndicator').classList.add('active');
-                document.getElementById('connectionText').textContent = 'CONNECTED';
+                document.getElementById('statusDot').classList.add('active');
+                document.getElementById('statusText').textContent = 'CONNECTED';
                 
-                // Parse fields
-                const parsedData = {
+                const parsed = {
                     eventType: data.field1 || 'NONE',
                     magnitude: data.field2 || '--',
                     lat: data.field3,
@@ -2042,81 +1058,53 @@
                     status: data.field8 || 'UNKNOWN'
                 };
                 
-                // Check for changes and show notifications
-                checkForChanges(parsedData);
+                checkChanges(parsed);
                 
-                // Update chart data
-                if (parsedData.magnitude !== '--') {
-                    magnitudeHistory.push(parseFloat(parsedData.magnitude));
-                    updateCharts();
+                // Update chart
+                if (parsed.magnitude !== '--') {
+                    magnitudeHistory.push(parseFloat(parsed.magnitude));
+                    if (magnitudeHistory.length > 15) magnitudeHistory.shift();
+                    chart.data.labels = magnitudeHistory.map((_, i) => i + 1);
+                    chart.data.datasets[0].data = magnitudeHistory;
+                    chart.update('none');
                 }
                 
-                if (parsedData.rssi) {
-                    rssiHistory.push(parseFloat(parsedData.rssi));
-                    updateCharts();
-                    updateNetworkQuality(parseFloat(parsedData.rssi));
-                    updateSignalQuality(parseFloat(parsedData.rssi));
-                }
+                // Update UI
+                document.getElementById('eventCount').textContent = parsed.count;
+                document.getElementById('rssi').textContent = parsed.rssi || '--';
+                document.getElementById('magnitude').textContent = parsed.magnitude;
+                document.getElementById('lastEvent').textContent = parsed.eventType;
+                document.getElementById('buoyStatus').textContent = parsed.status;
+                document.getElementById('gpsValid').textContent = parsed.gpsValid === '1' ? 'VALID' : 'INVALID';
+                document.getElementById('lat').textContent = parsed.lat ? parseFloat(parsed.lat).toFixed(6) + '°' : 'NO DATA';
+                document.getElementById('lon').textContent = parsed.lon ? parseFloat(parsed.lon).toFixed(6) + '°' : 'NO DATA';
                 
-                // Update primary stats
-                document.getElementById('eventCounter').textContent = parsedData.count;
-                document.getElementById('rssiValue').textContent = parsedData.rssi || '--';
-                document.getElementById('magnitudeValue').textContent = parsedData.magnitude;
-                document.getElementById('lastEvent').textContent = parsedData.eventType;
-                
-                // Update status panel
-                const operationalStatusEl = document.getElementById('operationalStatus');
-                let statusBadge = '';
-                if (parsedData.status === 'DEPLOYED' || parsedData.status === 'ONLINE') {
-                    statusBadge = `<span class="badge success">${parsedData.status}</span>`;
-                } else if (parsedData.status.includes('GPS') || parsedData.status.includes('CALIB')) {
-                    statusBadge = `<span class="badge warning">${parsedData.status}</span>`;
+                // Status badges
+                const opEl = document.getElementById('opStatus');
+                if (parsed.status === 'DEPLOYED' || parsed.status === 'ONLINE') {
+                    opEl.innerHTML = `<span class="badge success">${parsed.status}</span>`;
+                } else if (parsed.status.includes('GPS') || parsed.status.includes('CALIB')) {
+                    opEl.innerHTML = `<span class="badge warning">${parsed.status}</span>`;
                 } else {
-                    statusBadge = `<span class="badge danger">${parsedData.status}</span>`;
-                }
-                operationalStatusEl.innerHTML = statusBadge;
-                
-                const gpsLockEl = document.getElementById('gpsLock');
-                if (parsedData.gpsValid === '1') {
-                    gpsLockEl.innerHTML = '<span class="badge success">LOCKED</span>';
-                } else {
-                    gpsLockEl.innerHTML = '<span class="badge danger">NO LOCK</span>';
+                    opEl.innerHTML = `<span class="badge danger">${parsed.status}</span>`;
                 }
                 
-                // Update secondary cards
-                document.getElementById('buoyStatus').textContent = parsedData.status;
-                document.getElementById('gpsValid').textContent = parsedData.gpsValid === '1' ? 'VALID' : 'INVALID';
+                const gpsEl = document.getElementById('gpsStatus');
+                gpsEl.innerHTML = parsed.gpsValid === '1' ? 
+                    '<span class="badge success">LOCKED</span>' : 
+                    '<span class="badge danger">NO LOCK</span>';
                 
-                // Update location
-                document.getElementById('latitudeValue').textContent = 
-                    parsedData.lat ? parseFloat(parsedData.lat).toFixed(6) + '°' : 'NO DATA';
-                document.getElementById('longitudeValue').textContent = 
-                    parsedData.lon ? parseFloat(parsedData.lon).toFixed(6) + '°' : 'NO DATA';
-                
-                // Update timestamp
-                const now = new Date();
                 document.getElementById('lastUpdate').textContent = 
-                    now.toLocaleTimeString('en-US', { hour12: false });
+                    new Date().toLocaleTimeString('en-US', { hour12: false });
                 
             } catch (e) {
-                console.error("Error fetching data:", e);
-                document.getElementById('statusIndicator').classList.remove('active');
-                document.getElementById('connectionText').textContent = 'ERROR';
-                
-                if (!firstLoad) {
-                    showNotification(
-                        'Connection Error',
-                        'Failed to fetch data from ThingSpeak',
-                        'warning'
-                    );
-                }
+                console.error(e);
+                document.getElementById('statusDot').classList.remove('active');
+                document.getElementById('statusText').textContent = 'ERROR';
+                if (!firstLoad) notify('Connection Error', 'Failed to fetch data', 'warning');
             }
         }
-
-        // Initialize everything
-        createParticles();
-        createDataStream();
-        initCharts();
+        
         fetchData();
         setInterval(fetchData, REFRESH_MS);
     </script>
