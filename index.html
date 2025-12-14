@@ -1,15 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>ESP32 Buoy Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
-/* Use your second HTML CSS directly for style */
-/* ... Paste your full CSS from the second HTML here ... */
+/* --- Styles from your modern dashboard --- */
+* { margin:0;padding:0;box-sizing:border-box; }
+body { font-family: 'Montserrat', sans-serif; background:#000; color:#fff; min-height:100vh; padding:40px 20px; line-height:1.6; }
+.container { max-width:1600px; margin:0 auto; }
+.header { display:flex; justify-content:space-between; align-items:center; margin-bottom:60px; padding-bottom:30px; border-bottom:1px solid #222; }
+.header-title { display:flex; align-items:baseline; gap:16px; }
+.header h1 { font-size:2em; font-weight:700; text-transform:uppercase; letter-spacing:-1px; }
+.header-credit { font-size:0.75em; font-weight:500; color:#666; text-transform:lowercase; letter-spacing:1px; }
+.status-indicator { display:flex; align-items:center; gap:12px; font-size:0.8em; font-weight:600; text-transform:uppercase; letter-spacing:1px; }
+.status-dot { width:10px;height:10px;border-radius:50%;background:#444;position:relative; }
+.status-dot.connected { background:#0ff; box-shadow:0 0 10px #0ff; }
+.dashboard { transition:all 0.5s ease; opacity:0; transform:translateY(20px); }
+.dashboard.visible { opacity:1; transform:translateY(0); }
+.gps-status-banner { background:#0a0a0a; border:1px solid #333; border-left:4px solid #ffcc00; padding:24px; margin-bottom:40px; display:none; align-items:center; gap:20px; animation:slideDown 0.5s ease; }
+.gps-status-banner.active { display:flex; }
+.gps-status-banner.monitoring { border-left-color:#0ff; }
+@keyframes slideDown { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
+.card { background:#0a0a0a; border:1px solid #222; border-radius:0; padding:32px; transition:all 0.3s ease; position:relative; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(350px,1fr)); gap:24px; margin-bottom:40px; }
+.card-header { margin-bottom:32px; padding-bottom:20px; border-bottom:1px solid #1a1a1a; }
+.card-title { font-size:0.75em; font-weight:700; color:#fff; letter-spacing:2px; text-transform:uppercase; }
+.data-grid { display:grid; gap:24px; }
+.data-item { display:flex; justify-content:space-between; align-items:baseline; gap:16px; }
+.data-label { font-size:0.75em; color:#666; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; }
+.data-value { font-size:1.25em; font-weight:600; color:#fff; font-variant-numeric:tabular-nums; letter-spacing:-0.5px; }
+.data-value.invalid { color:#333; font-style:italic; font-weight:400; }
+.data-value.drift-warning { color:#ffcc00; }
+.data-value.drift-danger { color:#ff3333; }
+.section-title { font-size:0.75em; font-weight:700; color:#666; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; }
+.clear-events-btn { background:transparent; color:#666; border:1px solid #333; padding:8px 20px; font-size:0.75em; transition:all 0.3s ease; }
+.clear-events-btn:hover:not(:disabled) { background:#ff3333; color:#fff; border-color:#ff3333; }
+.event-list { display:grid; gap:16px; }
+.event-item { background:#0a0a0a; border:1px solid #222; padding:24px; transition:all 0.3s ease; animation:slideIn 0.5s ease; }
+@keyframes slideIn { from {opacity:0; transform:translateX(-20px);} to {opacity:1; transform:translateX(0);} }
+.event-item.impact { border-left:3px solid #0ff; }
+.event-item.drift { border-left:3px solid #ffcc00; }
+.event-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.event-type { font-size:0.85em; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; }
+.event-time { font-size:0.75em; color:#666; font-family:'Courier New',monospace; }
+.event-detail { color:#888; }
+.event-detail strong { color:#fff; }
+.empty-state { text-align:center; padding:60px 20px; color:#444; }
+.empty-state-text { font-size:0.85em; text-transform:uppercase; letter-spacing:1px; }
 </style>
 </head>
 <body>
@@ -28,107 +69,34 @@
     <div class="dashboard visible">
         <!-- GPS Status Banner -->
         <div class="gps-status-banner" id="gpsStatusBanner">
-            <svg class="gps-status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M12 2v4M12 18v4M2 12h4M18 12h4"></path>
-            </svg>
             <div class="gps-status-content">
                 <div class="gps-status-title" id="gpsStatusTitle">GPS STATUS</div>
                 <div class="gps-status-message" id="gpsStatusMessage">Initializing...</div>
-            </div>
-            <div class="gps-status-timer" id="gpsStatusTimer"></div>
-        </div>
-
-        <!-- Alert Banner -->
-        <div class="alert-banner" id="alertBanner">
-            <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                <line x1="12" y1="9" x2="12" y2="13"></line>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-            </svg>
-            <div class="alert-content">
-                <div class="alert-title" id="alertTitle">EVENT DETECTED</div>
-                <div class="alert-message" id="alertMessage">Critical event detected. Immediate attention required.</div>
-            </div>
-            <div class="alert-actions">
-                <button class="btn btn-warning" onclick="confirmEvent()"><span>CONFIRM</span></button>
-                <button class="btn btn-danger" onclick="sendMaintenance()"><span>SEND MAINTENANCE</span></button>
-            </div>
-        </div>
-
-        <!-- Last Seen Board -->
-        <div class="last-seen-board" id="lastSeenBoard">
-            <div class="last-seen-header">Last Known Event</div>
-            <div class="last-seen-content">
-                <div class="last-seen-item">
-                    <div class="last-seen-label">Event Type</div>
-                    <div class="last-seen-value" id="lastEventType">—</div>
-                </div>
-                <div class="last-seen-item">
-                    <div class="last-seen-label">Date & Time</div>
-                    <div class="last-seen-value" id="lastEventTime">—</div>
-                </div>
-                <div class="last-seen-item">
-                    <div class="last-seen-label">Location</div>
-                    <div class="last-seen-value" id="lastEventLocation">—</div>
-                </div>
-                <div class="last-seen-item">
-                    <div class="last-seen-label">Magnitude</div>
-                    <div class="last-seen-value" id="lastEventMagnitude">—</div>
-                </div>
             </div>
         </div>
 
         <div class="section-title">Live Sensor Data</div>
         <div class="grid">
-            <!-- Add cards for RTC, Accelerometer, GPS like in second HTML -->
             <div class="card">
-                <div class="card-header">
-                    <div class="card-title">Sensor Data</div>
-                </div>
+                <div class="card-header"><div class="card-title">Sensor Data</div></div>
                 <div class="data-grid">
-                    <div class="data-item">
-                        <span class="data-label">Event Type</span>
-                        <span class="data-value" id="sensorEventType">--</span>
-                    </div>
-                    <div class="data-item">
-                        <span class="data-label">Magnitude</span>
-                        <span class="data-value" id="sensorMagnitude">--</span>
-                    </div>
-                    <div class="data-item">
-                        <span class="data-label">RSSI</span>
-                        <span class="data-value" id="sensorRSSI">-- dBm</span>
-                    </div>
-                    <div class="data-item">
-                        <span class="data-label">Latitude</span>
-                        <span class="data-value" id="sensorLat">--</span>
-                    </div>
-                    <div class="data-item">
-                        <span class="data-label">Longitude</span>
-                        <span class="data-value" id="sensorLon">--</span>
-                    </div>
-                    <div class="data-item">
-                        <span class="data-label">Event Counter</span>
-                        <span class="data-value" id="sensorCount">--</span>
-                    </div>
-                    <div class="data-item">
-                        <span class="data-label">Status</span>
-                        <span class="data-value" id="sensorStatus">--</span>
-                    </div>
+                    <div class="data-item"><span class="data-label">Event Type</span><span class="data-value" id="eventType">--</span></div>
+                    <div class="data-item"><span class="data-label">Magnitude</span><span class="data-value" id="magnitude">--</span></div>
+                    <div class="data-item"><span class="data-label">RSSI</span><span class="data-value" id="rssi">-- dBm</span></div>
+                    <div class="data-item"><span class="data-label">Latitude</span><span class="data-value" id="lat">--</span></div>
+                    <div class="data-item"><span class="data-label">Longitude</span><span class="data-value" id="lon">--</span></div>
+                    <div class="data-item"><span class="data-label">Event Counter</span><span class="data-value" id="count">--</span></div>
+                    <div class="data-item"><span class="data-label">Status</span><span class="data-value" id="statusVal">--</span></div>
                 </div>
             </div>
         </div>
 
-        <div class="events-section">
-            <div class="section-title">
-                <span>Event History (Impact & Drift Detection)</span>
-                <button class="btn clear-events-btn" onclick="clearEvents()"><span>CLEAR EVENTS</span></button>
-            </div>
-            <div class="event-list" id="eventList">
-                <div class="empty-state">
-                    <div class="empty-state-text">No events detected yet</div>
-                </div>
-            </div>
+        <div class="section-title">
+            <span>Event History (Impact & Drift Detection)</span>
+            <button class="btn clear-events-btn" onclick="clearEvents()">CLEAR EVENTS</button>
+        </div>
+        <div class="event-list" id="eventList">
+            <div class="empty-state"><div class="empty-state-text">No events detected yet</div></div>
         </div>
     </div>
 </div>
@@ -136,118 +104,106 @@
 <script>
 const CHANNEL_ID = "3203006";
 const READ_API_KEY = "JN2TR7S7XJLS9TWW";
-const REFRESH_MS = 20000;
-let events = [];
-let currentAlert = null;
+const REFRESH_MS = 5000;
 
-async function fetchThingSpeak() {
+let events = [];
+
+async function fetchData() {
+    const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json?api_key=${READ_API_KEY}`;
     try {
-        const res = await fetch(`https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json?api_key=${READ_API_KEY}`);
+        const res = await fetch(url);
         const data = await res.json();
 
-        const eventType = data.field1;
-        const magnitude = parseFloat(data.field2);
-        const lat = parseFloat(data.field3);
-        const lon = parseFloat(data.field4);
-        const rssi = data.field5;
-        const count = data.field7;
-        const status = data.field8;
+        const eventType = data.field1 || '--';
+        const magnitude = data.field2 || 0;
+        const lat = data.field3 || '--';
+        const lon = data.field4 || '--';
+        const rssi = data.field5 || '--';
+        const count = data.field7 || 0;
+        const status = data.field8 || 'DISCONNECTED';
 
-        document.getElementById('sensorEventType').textContent = eventType || '--';
-        document.getElementById('sensorMagnitude').textContent = magnitude || '--';
-        document.getElementById('sensorRSSI').textContent = rssi ? rssi + ' dBm' : '--';
-        document.getElementById('sensorLat').textContent = lat || '--';
-        document.getElementById('sensorLon').textContent = lon || '--';
-        document.getElementById('sensorCount').textContent = count || '--';
-        document.getElementById('sensorStatus').textContent = status || '--';
+        document.getElementById('eventType').textContent = eventType;
+        document.getElementById('magnitude').textContent = magnitude;
+        document.getElementById('lat').textContent = lat;
+        document.getElementById('lon').textContent = lon;
+        document.getElementById('rssi').textContent = rssi + ' dBm';
+        document.getElementById('count').textContent = count;
+        document.getElementById('statusVal').textContent = status;
 
-        if (eventType) {
-            addEvent({
-                eventType: eventType,
-                magnitude: magnitude || 0,
-                dateTime: new Date().toLocaleString(),
-                latitude: lat || 0,
-                longitude: lon || 0,
-                locationValid: !!(lat && lon)
-            });
-            showAlert({
-                eventType: eventType,
-                magnitude: magnitude || 0,
-                dateTime: new Date().toLocaleString(),
-                latitude: lat || 0,
-                longitude: lon || 0,
-                locationValid: !!(lat && lon)
-            });
+        // GPS banner
+        const gpsBanner = document.getElementById('gpsStatusBanner');
+        const gpsTitle = document.getElementById('gpsStatusTitle');
+        const gpsMsg = document.getElementById('gpsStatusMessage');
+        if(status.includes('GPS_FAILED')){
+            gpsBanner.classList.add('active');
+            gpsBanner.classList.remove('monitoring');
+            gpsTitle.textContent = 'GPS FAILED';
+            gpsMsg.textContent = 'Initializing...';
+        } else {
+            gpsBanner.classList.add('active','monitoring');
+            gpsTitle.textContent = 'GPS ACTIVE';
+            gpsMsg.textContent = 'Tracking position';
         }
 
-        document.getElementById('statusText').textContent = status || 'UNKNOWN';
-        document.getElementById('statusDot').classList.add('connected');
+        // Status dot
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        statusText.textContent = status;
+        if(status === 'DEPLOYED' || status === 'ONLINE'){
+            statusDot.classList.add('connected');
+        } else {
+            statusDot.classList.remove('connected');
+        }
 
-    } catch (e) {
+        // Add event to history if new
+        if(eventType && eventType!=='--'){
+            const now = new Date().toLocaleString();
+            addEvent({eventType, magnitude, latitude: lat, longitude: lon, dateTime: now, locationValid: lat!=='--'});
+        }
+
+    } catch(e){
         console.error('ThingSpeak fetch error', e);
-        document.getElementById('statusText').textContent = 'ERROR';
-        document.getElementById('statusDot').classList.remove('connected');
     }
 }
 
-function addEvent(eventData) {
-    events.unshift(eventData);
+function addEvent(event){
+    events.unshift(event);
     if(events.length>10) events.pop();
     renderEvents();
 }
 
-function renderEvents() {
+function renderEvents(){
     const eventList = document.getElementById('eventList');
     if(events.length===0){
         eventList.innerHTML = '<div class="empty-state"><div class="empty-state-text">No events detected yet</div></div>';
         return;
     }
-    let html='';
-    for(let ev of events){
-        html += `<div class="event-item ${ev.eventType.toLowerCase()}">
-        <div class="event-header">
-            <div class="event-type">${ev.eventType}</div>
-            <div class="event-time">${ev.dateTime}</div>
-        </div>
-        <div class="event-details">
-            <div class="event-detail"><strong>Magnitude:</strong> ${ev.magnitude}</div>
-            <div class="event-detail"><strong>Location:</strong> ${ev.locationValid ? ev.latitude.toFixed(6)+', '+ev.longitude.toFixed(6) : 'No GPS fix'}</div>
-        </div>
+    let html = '';
+    events.forEach(ev=>{
+        const loc = ev.locationValid ? ev.latitude + '°, ' + ev.longitude + '°' : 'No GPS fix';
+        const cls = ev.eventType.toLowerCase() === 'drift' ? 'drift' : 'impact';
+        const unit = ev.eventType.toLowerCase() === 'drift' ? 'm' : 'm/s²';
+        html += `<div class="event-item ${cls}">
+            <div class="event-header">
+                <div class="event-type">${ev.eventType}</div>
+                <div class="event-time">${ev.dateTime}</div>
+            </div>
+            <div class="event-details">
+                <div class="event-detail"><strong>Magnitude:</strong> ${ev.magnitude} ${unit}</div>
+                <div class="event-detail"><strong>Location:</strong> ${loc}</div>
+            </div>
         </div>`;
-    }
+    });
     eventList.innerHTML = html;
-}
-
-function showAlert(ev){
-    const alertBanner = document.getElementById('alertBanner');
-    const alertTitle = document.getElementById('alertTitle');
-    const alertMessage = document.getElementById('alertMessage');
-    const lastSeenBoard = document.getElementById('lastSeenBoard');
-
-    alertTitle.textContent = ev.eventType + ' DETECTED';
-    alertMessage.textContent = ev.eventType === 'DRIFT' ? 'Buoy drifted '+ev.magnitude+' meters.' : 'Impact detected!';
-    alertBanner.classList.add('active');
-    lastSeenBoard.classList.add('active');
-
-    document.getElementById('lastEventType').textContent = ev.eventType;
-    document.getElementById('lastEventTime').textContent = ev.dateTime;
-    document.getElementById('lastEventMagnitude').textContent = ev.magnitude;
-    document.getElementById('lastEventLocation').textContent = ev.locationValid ? ev.latitude.toFixed(6)+', '+ev.longitude.toFixed(6) : 'No GPS fix';
-}
-
-function confirmEvent(){
-    document.getElementById('alertBanner').classList.remove('active');
-    currentAlert=null;
 }
 
 function clearEvents(){
     events=[];
     renderEvents();
-    document.getElementById('lastSeenBoard').classList.remove('active');
 }
 
-fetchThingSpeak();
-setInterval(fetchThingSpeak, REFRESH_MS);
+fetchData();
+setInterval(fetchData, REFRESH_MS);
 </script>
 </body>
 </html>
