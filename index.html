@@ -28,6 +28,7 @@
             --warning: #f59e0b;
             --danger: #ef4444;
             --accent: #0ea5e9;
+            --override: #f97316; /* Orange for Override */
         }
         
         body {
@@ -158,9 +159,21 @@
             animation: pulse 2s infinite;
         }
         
+        /* New Override Status Dot Style */
+        .status-dot.override {
+            background: var(--override);
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+            animation: pulse-orange 1s infinite;
+        }
+
         @keyframes pulse {
             0%, 100% { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
             50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+        }
+
+        @keyframes pulse-orange {
+            0%, 100% { box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2); }
+            50% { box-shadow: 0 0 0 6px rgba(249, 115, 22, 0); }
         }
         
         .status-text {
@@ -318,6 +331,8 @@
             font-weight: 700;
             text-transform: uppercase;
             font-family: 'JetBrains Mono', monospace;
+            display: inline-block;
+            margin-left: 5px;
         }
         
         .badge.success {
@@ -336,6 +351,18 @@
             background: rgba(239, 68, 68, 0.1);
             color: var(--danger);
             border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .badge.override {
+            background: rgba(249, 115, 22, 0.1);
+            color: var(--override);
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            animation: pulse-opacity 2s infinite;
+        }
+
+        @keyframes pulse-opacity {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
         }
         
         .badge.neutral {
@@ -565,6 +592,8 @@
         
         .notification.success .notification-icon { background: var(--success); }
         .notification.warning .notification-icon { background: var(--warning); }
+        .notification.danger .notification-icon { background: var(--danger); }
+        .notification.override .notification-icon { background: var(--override); }
         .notification.info .notification-icon { background: var(--accent); }
         
         .notification-title {
@@ -699,15 +728,12 @@
     </style>
 </head>
 <body>
-    <!-- Loading -->
     <div class="loading" id="loading">
         <div class="spinner"></div>
     </div>
     
-    <!-- Notifications -->
     <div class="notifications" id="notifications"></div>
     
-    <!-- Controls -->
     <div class="controls">
         <div class="control-btn" id="soundBtn" title="Toggle Sound">🔇</div>
         <div class="control-btn" id="exportBtn" title="Export Data">⬇</div>
@@ -715,7 +741,6 @@
     </div>
     
     <div class="container">
-        <!-- Header -->
         <header class="header">
             <div class="header-top">
                 <div class="header-title">
@@ -746,15 +771,12 @@
             </div>
         </header>
         
-        <!-- Main Grid -->
         <div class="main-grid">
-            <!-- Chart -->
             <div class="chart-section">
                 <div class="chart-title">Magnitude Trend (Last 15 readings)</div>
                 <canvas id="chart"></canvas>
             </div>
             
-            <!-- Status Panel -->
             <div class="status-panel">
                 <div class="panel-title">System Status</div>
                 <div class="status-item">
@@ -769,10 +791,9 @@
                     <span class="status-label">Connection</span>
                     <span><span class="badge success">STABLE</span></span>
                 </div>
-            </div>
+                </div>
         </div>
         
-        <!-- Stats -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-label">Event Counter</div>
@@ -799,7 +820,6 @@
             </div>
         </div>
         
-        <!-- Timeline -->
         <div class="timeline-section">
             <div class="timeline-header">
                 <div class="chart-title">Event Timeline</div>
@@ -810,12 +830,11 @@
             </div>
         </div>
         
-        <!-- Data Cards -->
         <div class="data-grid">
             <div class="data-card">
-                <div class="data-label">Buoy Status</div>
-                <div class="data-value" id="buoyStatus">--</div>
-                <div class="data-subtext">Operational mode</div>
+                <div class="data-label">Buoy Mode</div>
+                <div class="data-value" id="buoyMode">--</div>
+                <div class="data-subtext" id="buoyModeSub">Operational mode</div>
             </div>
             
             <div class="data-card">
@@ -831,7 +850,6 @@
             </div>
         </div>
         
-        <!-- Location -->
         <div class="location-card">
             <div>
                 <div class="location-label">Latitude</div>
@@ -843,7 +861,6 @@
             </div>
         </div>
         
-        <!-- Footer -->
         <footer class="footer">
             <div style="margin-bottom: 8px;">
                 <strong>Muhammad Irfan</strong> · <a href="https://instagram.com/hzetronics" target="_blank">@Hzetronics</a>
@@ -961,7 +978,7 @@
             `;
             document.getElementById('notifications').appendChild(div);
             
-            beep(type === 'success' ? 1000 : type === 'warning' ? 600 : 800);
+            beep(type === 'success' ? 1000 : type === 'warning' ? 600 : type === 'override' ? 1200 : 800);
             
             setTimeout(() => {
                 div.classList.add('hiding');
@@ -1015,10 +1032,20 @@
                 renderTimeline();
             }
             
-            if (data.status !== prevData.status) {
-                const type = (data.status === 'DEPLOYED' || data.status === 'ONLINE') ? 'success' : 'warning';
-                notify('Status Change', `Now: ${data.status}`, type);
-                highlight('buoyStatus');
+            // Check for Override Mode Change
+            if (data.isOverride !== prevData.isOverride) {
+                if (data.isOverride) {
+                    notify('System Alert', 'OVERRIDE MODE ACTIVATED', 'override');
+                } else {
+                    notify('System Info', 'Override Mode Deactivated', 'info');
+                }
+                highlight('buoyMode');
+            }
+
+            if (data.baseStatus !== prevData.baseStatus) {
+                const type = (data.baseStatus === 'DEPLOYED' || data.baseStatus === 'ONLINE') ? 'success' : 'warning';
+                notify('Status Change', `Now: ${data.baseStatus}`, type);
+                highlight('buoyMode');
             }
             
             if (parseInt(data.count) > parseInt(prevData.count || 0)) {
@@ -1027,8 +1054,13 @@
             }
             
             if (data.gpsValid !== prevData.gpsValid) {
-                notify('GPS Status', data.gpsValid === '1' ? 'Lock acquired' : 'Lock lost', 
-                    data.gpsValid === '1' ? 'success' : 'warning');
+                // If not valid and NOT in override, it's a lost lock (warning)
+                // If not valid but IN override, it's bypassed (info)
+                if (data.gpsValid === '1') {
+                    notify('GPS Status', 'Lock acquired', 'success');
+                } else if (!data.isOverride) {
+                    notify('GPS Status', 'Lock lost', 'danger');
+                }
                 highlight('gpsStatus');
             }
             
@@ -1049,9 +1081,11 @@
                     firstLoad = false;
                 }
                 
-                document.getElementById('statusDot').classList.add('active');
-                document.getElementById('statusText').textContent = 'CONNECTED';
-                
+                // Parse Status from Field 8 (format: "STATUS" or "STATUS_OVR")
+                const rawStatus = data.field8 || 'UNKNOWN';
+                const isOverride = rawStatus.endsWith('_OVR');
+                const baseStatus = isOverride ? rawStatus.replace('_OVR', '') : rawStatus;
+
                 const parsed = {
                     eventType: data.field1 || 'NONE',
                     magnitude: data.field2 || '--',
@@ -1060,9 +1094,21 @@
                     rssi: data.field5,
                     gpsValid: data.field6,
                     count: data.field7 || '0',
-                    status: data.field8 || 'UNKNOWN'
+                    baseStatus: baseStatus,
+                    isOverride: isOverride
                 };
                 
+                // Update Main Status Dot
+                const dot = document.getElementById('statusDot');
+                dot.className = 'status-dot'; // Reset
+                if (parsed.isOverride) {
+                    dot.classList.add('override');
+                    document.getElementById('statusText').textContent = 'OVERRIDE';
+                } else {
+                    dot.classList.add('active');
+                    document.getElementById('statusText').textContent = 'CONNECTED';
+                }
+
                 checkChanges(parsed);
                 
                 // Update chart
@@ -1074,37 +1120,65 @@
                     chart.update('none');
                 }
                 
-                // Update UI
+                // Update UI Elements
                 document.getElementById('eventCount').textContent = parsed.count;
                 document.getElementById('rssi').textContent = parsed.rssi || '--';
                 document.getElementById('magnitude').textContent = parsed.magnitude;
                 document.getElementById('lastEvent').textContent = parsed.eventType;
-                document.getElementById('buoyStatus').textContent = parsed.status;
-                document.getElementById('gpsValid').textContent = parsed.gpsValid === '1' ? 'VALID' : 'INVALID';
+                
+                // Buoy Mode Card
+                const modeEl = document.getElementById('buoyMode');
+                const modeSubEl = document.getElementById('buoyModeSub');
+                if (parsed.isOverride) {
+                    modeEl.textContent = 'OVERRIDE';
+                    modeEl.style.color = 'var(--override)';
+                    modeSubEl.textContent = parsed.baseStatus + ' (GPS Skip)';
+                } else {
+                    modeEl.textContent = parsed.baseStatus;
+                    modeEl.style.color = 'var(--text-primary)';
+                    modeSubEl.textContent = 'Normal Operation';
+                }
+                
+                document.getElementById('gpsValid').textContent = parsed.gpsValid === '1' ? 'VALID' : (parsed.isOverride ? 'BYPASSED' : 'INVALID');
                 document.getElementById('lat').textContent = parsed.lat ? parseFloat(parsed.lat).toFixed(6) + '°' : 'NO DATA';
                 document.getElementById('lon').textContent = parsed.lon ? parseFloat(parsed.lon).toFixed(6) + '°' : 'NO DATA';
                 
-                // Status badges
+                // Status Panel Badges
                 const opEl = document.getElementById('opStatus');
-                if (parsed.status === 'DEPLOYED' || parsed.status === 'ONLINE') {
-                    opEl.innerHTML = `<span class="badge success">${parsed.status}</span>`;
-                } else if (parsed.status.includes('GPS') || parsed.status.includes('CALIB')) {
-                    opEl.innerHTML = `<span class="badge warning">${parsed.status}</span>`;
+                let statusHtml = '';
+                
+                // Base Status Badge
+                if (parsed.baseStatus === 'DEPLOYED' || parsed.baseStatus === 'ONLINE') {
+                    statusHtml += `<span class="badge success">${parsed.baseStatus}</span>`;
+                } else if (parsed.baseStatus.includes('GPS') || parsed.baseStatus.includes('CALIB')) {
+                    statusHtml += `<span class="badge warning">${parsed.baseStatus}</span>`;
                 } else {
-                    opEl.innerHTML = `<span class="badge danger">${parsed.status}</span>`;
+                    statusHtml += `<span class="badge danger">${parsed.baseStatus}</span>`;
                 }
                 
+                // Override Badge appended
+                if (parsed.isOverride) {
+                    statusHtml += `<span class="badge override">OVERRIDE</span>`;
+                }
+                
+                opEl.innerHTML = statusHtml;
+                
+                // GPS Status Badge in Panel
                 const gpsEl = document.getElementById('gpsStatus');
-                gpsEl.innerHTML = parsed.gpsValid === '1' ? 
-                    '<span class="badge success">LOCKED</span>' : 
-                    '<span class="badge danger">NO LOCK</span>';
+                if (parsed.gpsValid === '1') {
+                    gpsEl.innerHTML = '<span class="badge success">LOCKED</span>';
+                } else if (parsed.isOverride) {
+                    gpsEl.innerHTML = '<span class="badge warning">BYPASSED</span>';
+                } else {
+                    gpsEl.innerHTML = '<span class="badge danger">NO LOCK</span>';
+                }
                 
                 document.getElementById('lastUpdate').textContent = 
                     new Date().toLocaleTimeString('en-US', { hour12: false });
                 
             } catch (e) {
                 console.error(e);
-                document.getElementById('statusDot').classList.remove('active');
+                document.getElementById('statusDot').className = 'status-dot';
                 document.getElementById('statusText').textContent = 'ERROR';
                 if (!firstLoad) notify('Connection Error', 'Failed to fetch data', 'warning');
             }
