@@ -268,6 +268,105 @@
         .text-accent { color: var(--accent); }
         .text-purple { color: var(--purple); }
         
+        /* Big Event Widget */
+        .event-widget {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .event-widget::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--text-muted);
+            transition: background 0.3s;
+        }
+        
+        .event-widget.event-impact::before {
+            background: var(--danger);
+        }
+        
+        .event-widget.event-drift::before {
+            background: var(--warning);
+        }
+        
+        .event-widget.event-status::before {
+            background: var(--accent);
+        }
+        
+        .event-widget.event-waiting::before {
+            background: var(--text-muted);
+        }
+        
+        .event-label {
+            font-size: 0.688rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+        
+        .event-type-big {
+            font-size: 4rem;
+            font-weight: 300;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -2px;
+            line-height: 1;
+            margin-bottom: 12px;
+            transition: color 0.3s;
+        }
+        
+        .event-description {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+        
+        .event-magnitude-display {
+            display: inline-block;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+        
+        /* Footer */
+        footer {
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.813rem;
+        }
+        
+        .developer-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .instagram-link {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .instagram-link:hover {
+            color: var(--text-primary);
+        }
+        
         /* Responsive */
         @media (max-width: 768px) {
             .grid-2 {
@@ -280,6 +379,19 @@
             
             h1 {
                 font-size: 1.5rem;
+            }
+            
+            .event-widget {
+                padding: 30px 20px;
+            }
+            
+            .event-type-big {
+                font-size: 2.5rem;
+            }
+            
+            .event-magnitude-display {
+                font-size: 1.2rem;
+                padding: 10px 20px;
             }
         }
     </style>
@@ -297,6 +409,16 @@
                 <div class="time" id="currentTime">--:--:--</div>
             </div>
         </header>
+        
+        <!-- Big Event Widget -->
+        <div class="event-widget event-waiting" id="eventWidget">
+            <div class="event-label">Current Event</div>
+            <div class="event-type-big" id="eventTypeBig">WAITING</div>
+            <div class="event-description" id="eventDescriptionBig">No events detected</div>
+            <div class="event-magnitude-display" id="magnitudeBig">0.000 g</div>
+        </div>
+        
+        <br>
         
         <!-- Primary Stats -->
         <div class="grid">
@@ -391,6 +513,12 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Footer -->
+        <footer>
+            <p>Developed by <span class="developer-name">Muhammad Irfan</span></p>
+            <p><a href="https://instagram.com/hzetronics" target="_blank" class="instagram-link">@hzetronics</a></p>
+        </footer>
     </div>
     
     <!-- Alert Banner -->
@@ -574,6 +702,34 @@
                 eventTypeEl.textContent = eventType;
                 eventTypeEl.className = `stat-value ${eventColor}`;
                 document.getElementById('eventSubtype').textContent = eventSubtype;
+                
+                // Update BIG Event Widget
+                const eventWidget = document.getElementById('eventWidget');
+                const eventTypeBig = document.getElementById('eventTypeBig');
+                const eventDescriptionBig = document.getElementById('eventDescriptionBig');
+                const magnitudeBig = document.getElementById('magnitudeBig');
+                
+                // Remove all event classes
+                eventWidget.classList.remove('event-impact', 'event-drift', 'event-status', 'event-waiting');
+                
+                // Add appropriate class and update content
+                if (eventTypeCode === 1) {
+                    eventWidget.classList.add('event-impact');
+                    eventTypeBig.className = 'event-type-big text-danger';
+                } else if (eventTypeCode === 2) {
+                    eventWidget.classList.add('event-drift');
+                    eventTypeBig.className = 'event-type-big text-warning';
+                } else if (eventTypeCode === 3) {
+                    eventWidget.classList.add('event-status');
+                    eventTypeBig.className = 'event-type-big text-accent';
+                } else {
+                    eventWidget.classList.add('event-waiting');
+                    eventTypeBig.className = 'event-type-big';
+                }
+                
+                eventTypeBig.textContent = eventType;
+                eventDescriptionBig.textContent = eventSubtype;
+                magnitudeBig.textContent = magnitude.toFixed(3) + ' g';
                 
                 document.getElementById('magnitude').textContent = magnitude.toFixed(3);
                 document.getElementById('rssi').textContent = rssi;
