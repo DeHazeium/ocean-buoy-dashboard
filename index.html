@@ -37,7 +37,6 @@
             padding: 40px 20px;
         }
         
-        /* Header */
         header {
             margin-bottom: 40px;
             padding-bottom: 20px;
@@ -90,7 +89,6 @@
             color: var(--text-secondary);
         }
         
-        /* Grid Layout */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -105,7 +103,6 @@
             margin-bottom: 16px;
         }
         
-        /* Widget Base */
         .widget {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -126,7 +123,6 @@
             margin-bottom: 16px;
         }
         
-        /* Stat Widget */
         .stat-value {
             font-size: 2.5rem;
             font-weight: 300;
@@ -141,7 +137,6 @@
             margin-top: 4px;
         }
         
-        /* Data List Widget */
         .data-list {
             display: flex;
             flex-direction: column;
@@ -172,7 +167,6 @@
             font-weight: 500;
         }
         
-        /* Badge */
         .badge {
             display: inline-block;
             padding: 2px 8px;
@@ -213,13 +207,11 @@
             background: rgba(255, 255, 255, 0.05);
         }
         
-        /* Chart Widget */
         .chart-container {
             position: relative;
             height: 180px;
         }
         
-        /* Alert Banner */
         .alert-banner {
             position: fixed;
             top: 20px;
@@ -261,14 +253,12 @@
             color: var(--text-secondary);
         }
         
-        /* Color Highlights */
         .text-success { color: var(--success); }
         .text-warning { color: var(--warning); }
         .text-danger { color: var(--danger); }
         .text-accent { color: var(--accent); }
         .text-purple { color: var(--purple); }
         
-        /* Big Event Widget */
         .event-widget {
             background: var(--surface);
             border: 2px solid var(--border);
@@ -342,7 +332,6 @@
             margin-top: 8px;
         }
         
-        /* Footer */
         footer {
             margin-top: 60px;
             padding-top: 30px;
@@ -367,7 +356,6 @@
             color: var(--text-primary);
         }
         
-        /* Responsive */
         @media (max-width: 768px) {
             .grid-2 {
                 grid-template-columns: 1fr;
@@ -410,7 +398,6 @@
             </div>
         </header>
         
-        <!-- Big Event Widget -->
         <div class="event-widget event-waiting" id="eventWidget">
             <div class="event-label">Current Event</div>
             <div class="event-type-big" id="eventTypeBig">WAITING</div>
@@ -420,7 +407,6 @@
         
         <br>
         
-        <!-- Primary Stats -->
         <div class="grid">
             <div class="widget">
                 <div class="widget-title">Event Type</div>
@@ -447,7 +433,6 @@
             </div>
         </div>
         
-        <!-- Chart and Status -->
         <div class="grid-2">
             <div class="widget">
                 <div class="widget-title">Magnitude History</div>
@@ -460,26 +445,21 @@
                 <div class="widget-title">System Status</div>
                 <div class="data-list">
                     <div class="data-item">
-                        <span class="data-label">Deployment</span>
-                        <span class="data-value" id="deployStatus">--</span>
-                    </div>
-                    <div class="data-item">
-                        <span class="data-label">Operation Mode</span>
-                        <span class="data-value" id="modeStatus">--</span>
+                        <span class="data-label">Buoy Status</span>
+                        <span class="data-value" id="buoyStatus">--</span>
                     </div>
                     <div class="data-item">
                         <span class="data-label">GPS Status</span>
                         <span class="data-value" id="gpsStatus">--</span>
                     </div>
                     <div class="data-item">
-                        <span class="data-label">Total Packets</span>
-                        <span class="data-value" id="totalPackets">0</span>
+                        <span class="data-label">Last Update</span>
+                        <span class="data-value" id="lastUpdate">--</span>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Location Data -->
         <div class="grid">
             <div class="widget">
                 <div class="widget-title">GPS Coordinates</div>
@@ -492,36 +472,26 @@
                         <span class="data-label">Longitude</span>
                         <span class="data-value" id="longitude">--</span>
                     </div>
-                    <div class="data-item">
-                        <span class="data-label">GPS Valid</span>
-                        <span class="data-value" id="gpsValid">--</span>
-                    </div>
                 </div>
             </div>
             
             <div class="widget">
-                <div class="widget-title">Connection Info</div>
+                <div class="widget-title">Debug Info</div>
                 <div class="data-list">
                     <div class="data-item">
-                        <span class="data-label">Last Update</span>
-                        <span class="data-value" id="lastUpdate">--</span>
-                    </div>
-                    <div class="data-item">
-                        <span class="data-label">Buoy Status</span>
-                        <span class="data-value" id="buoyStatus">Initializing</span>
+                        <span class="data-label">Raw Data</span>
+                        <span class="data-value" id="debugInfo">--</span>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Footer -->
         <footer>
             <p>Developed by <span class="developer-name">Muhammad Irfan</span></p>
             <p><a href="https://instagram.com/hzetronics" target="_blank" class="instagram-link">@hzetronics</a></p>
         </footer>
     </div>
     
-    <!-- Alert Banner -->
     <div class="alert-banner" id="alertBanner">
         <div class="alert-banner-title" id="alertTitle"></div>
         <div class="alert-banner-text" id="alertText"></div>
@@ -530,8 +500,9 @@
     <script>
         // Configuration
         const CHANNEL_ID = '3203006';
+        const READ_API_KEY = 'JN2TR7S7XJLS9TWW';
         const REFRESH_INTERVAL = 8000; // 8 seconds
-        const API_URL = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json`;
+        const API_URL = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json?api_key=${READ_API_KEY}`;
         
         // Chart Setup
         const ctx = document.getElementById('magnitudeChart').getContext('2d');
@@ -569,9 +540,7 @@
                     }
                 },
                 scales: {
-                    x: {
-                        display: false
-                    },
+                    x: { display: false },
                     y: {
                         border: { display: false },
                         grid: {
@@ -593,10 +562,8 @@
             }
         });
         
-        // State tracking
         let previousData = {};
         
-        // Update clock
         function updateClock() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
@@ -608,7 +575,6 @@
         setInterval(updateClock, 1000);
         updateClock();
         
-        // Show alert banner
         function showAlert(title, text, type = 'impact') {
             const banner = document.getElementById('alertBanner');
             document.getElementById('alertTitle').textContent = title;
@@ -621,45 +587,45 @@
             }, 5000);
         }
         
-        // Fetch and update data
         async function fetchData() {
             try {
+                console.log('Fetching from:', API_URL);
                 const response = await fetch(API_URL);
                 const data = await response.json();
+                
+                console.log('Received data:', data);
                 
                 if (!data || !data.created_at) {
                     console.error('Invalid data received');
                     return;
                 }
                 
-                // Parse ThingSpeak fields
-                // Based on Arduino code:
-                // field1: eventType (1=IMPACT, 2=DRIFT, 3=STATUS, 4=OFFLINE)
-                // field2: magnitude
-                // field3: rssi
-                // field4: eventCount
-                // field5: gpsValid (1=valid, 0=invalid)
-                // field6: latitude
-                // field7: longitude
-                // field8: totalPackets
-                // field9: (reserved)
-                // field10: deployed (1=deployed, 0=not deployed)
-                // field11: override (1=override mode, 0=normal)
+                // CORRECT FIELD MAPPING:
+                // Field 1: Event Type (1=IMPACT, 2=DRIFT, 3=STATUS)
+                // Field 2: Magnitude
+                // Field 3: Latitude
+                // Field 4: Longitude
+                // Field 5: RSSI
+                // Field 6: GPS Valid (1/0)
+                // Field 7: Event Count
+                // Field 8: Buoy Status (1=Not Deployed, 2=Deployed Normal, 3=Deployed Override)
                 
                 const eventTypeCode = parseInt(data.field1) || 0;
                 const magnitude = parseFloat(data.field2) || 0;
-                const rssi = parseInt(data.field3) || 0;
-                const eventCount = parseInt(data.field4) || 0;
-                const gpsValid = parseInt(data.field5) || 0;
-                const latitude = parseFloat(data.field6) || 0;
-                const longitude = parseFloat(data.field7) || 0;
-                const totalPackets = parseInt(data.field8) || 0;
-                const deployed = parseInt(data.field10) || 0;
-                const override = parseInt(data.field11) || 0;
+                const latitude = parseFloat(data.field3) || 0;
+                const longitude = parseFloat(data.field4) || 0;
+                const rssi = parseInt(data.field5) || 0;
+                const gpsValid = parseInt(data.field6) || 0;
+                const eventCount = parseInt(data.field7) || 0;
+                const buoyStatusCode = parseInt(data.field8) || 1;
                 
-                // Map event type code to string
-                let eventType = 'UNKNOWN';
-                let eventSubtype = 'Unknown event';
+                // Debug info
+                document.getElementById('debugInfo').textContent = 
+                    `F1:${data.field1} F2:${data.field2} F3:${data.field3} F4:${data.field4} F5:${data.field5} F6:${data.field6} F7:${data.field7} F8:${data.field8}`;
+                
+                // Map event type
+                let eventType = 'WAITING';
+                let eventSubtype = 'No events';
                 let eventColor = 'text-accent';
                 
                 switch(eventTypeCode) {
@@ -678,17 +644,9 @@
                         eventSubtype = 'Status update';
                         eventColor = 'text-accent';
                         break;
-                    case 4:
-                        eventType = 'OFFLINE';
-                        eventSubtype = 'No signal received';
-                        eventColor = 'text-danger';
-                        break;
-                    default:
-                        eventType = 'WAITING';
-                        eventSubtype = 'No events';
                 }
                 
-                // Check for new impact or drift events
+                // Check for new events
                 if (previousData.eventCount !== undefined && eventCount > previousData.eventCount) {
                     if (eventTypeCode === 1) {
                         showAlert('⚠️ IMPACT DETECTED', `Magnitude: ${magnitude.toFixed(3)}g`, 'impact');
@@ -709,10 +667,8 @@
                 const eventDescriptionBig = document.getElementById('eventDescriptionBig');
                 const magnitudeBig = document.getElementById('magnitudeBig');
                 
-                // Remove all event classes
                 eventWidget.classList.remove('event-impact', 'event-drift', 'event-status', 'event-waiting');
                 
-                // Add appropriate class and update content
                 if (eventTypeCode === 1) {
                     eventWidget.classList.add('event-impact');
                     eventTypeBig.className = 'event-type-big text-danger';
@@ -734,22 +690,15 @@
                 document.getElementById('magnitude').textContent = magnitude.toFixed(3);
                 document.getElementById('rssi').textContent = rssi;
                 document.getElementById('eventCount').textContent = eventCount;
-                document.getElementById('totalPackets').textContent = totalPackets;
                 
-                // Update deployment status
-                const deployEl = document.getElementById('deployStatus');
-                if (deployed === 1) {
-                    deployEl.innerHTML = '<span class="badge badge-success">DEPLOYED</span>';
-                } else {
-                    deployEl.innerHTML = '<span class="badge badge-purple">FREE MODE</span>';
-                }
-                
-                // Update operation mode
-                const modeEl = document.getElementById('modeStatus');
-                if (override === 1) {
-                    modeEl.innerHTML = '<span class="badge badge-warning">OVERRIDE</span>';
-                } else {
-                    modeEl.innerHTML = '<span class="badge badge-success">NORMAL</span>';
+                // Update buoy status
+                const buoyStatusEl = document.getElementById('buoyStatus');
+                if (buoyStatusCode === 1) {
+                    buoyStatusEl.innerHTML = '<span class="badge badge-purple">NOT DEPLOYED</span>';
+                } else if (buoyStatusCode === 2) {
+                    buoyStatusEl.innerHTML = '<span class="badge badge-success">DEPLOYED</span>';
+                } else if (buoyStatusCode === 3) {
+                    buoyStatusEl.innerHTML = '<span class="badge badge-warning">OVERRIDE MODE</span>';
                 }
                 
                 // Update GPS status
@@ -768,23 +717,6 @@
                     document.getElementById('latitude').textContent = 'NO DATA';
                     document.getElementById('longitude').textContent = 'NO DATA';
                 }
-                
-                document.getElementById('gpsValid').textContent = gpsValid === 1 ? 'VALID' : 'INVALID';
-                
-                // Update buoy status based on state
-                let buoyStatusText = 'Active';
-                if (deployed === 0) {
-                    buoyStatusText = 'Not Deployed';
-                } else if (override === 1) {
-                    buoyStatusText = 'Override Mode';
-                } else if (eventTypeCode === 1) {
-                    buoyStatusText = 'Impact Detected';
-                } else if (eventTypeCode === 2) {
-                    buoyStatusText = 'Drift Detected';
-                } else {
-                    buoyStatusText = 'Monitoring';
-                }
-                document.getElementById('buoyStatus').textContent = buoyStatusText;
                 
                 // Update last update time
                 const updateTime = new Date(data.created_at);
@@ -807,11 +739,11 @@
                     chart.update('none');
                 }
                 
-                // Store previous data for change detection
                 previousData = { eventCount, eventTypeCode };
                 
             } catch (error) {
                 console.error('Error fetching data:', error);
+                document.getElementById('debugInfo').textContent = 'ERROR: ' + error.message;
             }
         }
         
