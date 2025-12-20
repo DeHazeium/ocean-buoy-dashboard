@@ -501,7 +501,7 @@
         // Configuration
         const CHANNEL_ID = '3203006';
         const READ_API_KEY = 'JN2TR7S7XJLS9TWW';
-        const REFRESH_INTERVAL = 8000; // 8 seconds
+        const REFRESH_INTERVAL = 15000; // 15 seconds to match ThingSpeak update rate
         const API_URL = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json?api_key=${READ_API_KEY}`;
         
         // Chart Setup
@@ -602,7 +602,7 @@
                 
                 // CORRECT FIELD MAPPING:
                 // Field 1: Event Type (1=IMPACT, 2=DRIFT, 3=STATUS)
-                // Field 2: Magnitude
+                // Field 2: Magnitude (m/s² or meters for drift)
                 // Field 3: Latitude
                 // Field 4: Longitude
                 // Field 5: RSSI
@@ -610,7 +610,7 @@
                 // Field 7: Event Count
                 // Field 8: Buoy Status (1=Not Deployed, 2=Deployed Normal, 3=Deployed Override)
                 
-                const eventTypeCode = parseInt(data.field1) || 0;
+                const eventTypeCode = parseInt(data.field1) || 3;
                 const magnitude = parseFloat(data.field2) || 0;
                 const latitude = parseFloat(data.field3) || 0;
                 const longitude = parseFloat(data.field4) || 0;
@@ -619,11 +619,11 @@
                 const eventCount = parseInt(data.field7) || 0;
                 const buoyStatusCode = parseInt(data.field8) || 1;
                 
-                // Debug info
+                // Debug info - show raw values
                 document.getElementById('debugInfo').textContent = 
-                    `F1:${data.field1} F2:${data.field2} F3:${data.field3} F4:${data.field4} F5:${data.field5} F6:${data.field6} F7:${data.field7} F8:${data.field8}`;
+                    `Type:${eventTypeCode} Mag:${magnitude} GPS:${gpsValid} Status:${buoyStatusCode}`;
                 
-                // Map event type
+                // Map event type to display
                 let eventType = 'WAITING';
                 let eventSubtype = 'No events';
                 let eventColor = 'text-accent';
@@ -631,31 +631,31 @@
                 switch(eventTypeCode) {
                     case 1:
                         eventType = 'IMPACT';
-                        eventSubtype = 'High energy detection';
+                        eventSubtype = 'High acceleration detected';
                         eventColor = 'text-danger';
                         break;
                     case 2:
                         eventType = 'DRIFT';
-                        eventSubtype = 'Position drift detected';
+                        eventSubtype = 'Position or orientation change';
                         eventColor = 'text-warning';
                         break;
                     case 3:
                         eventType = 'STATUS';
-                        eventSubtype = 'Status update';
+                        eventSubtype = 'System status update';
                         eventColor = 'text-accent';
                         break;
                 }
                 
-                // Check for new events
+                // Check for new events and show alerts
                 if (previousData.eventCount !== undefined && eventCount > previousData.eventCount) {
                     if (eventTypeCode === 1) {
-                        showAlert('⚠️ IMPACT DETECTED', `Magnitude: ${magnitude.toFixed(3)}g`, 'impact');
+                        showAlert('⚠️ IMPACT DETECTED', `Magnitude: ${magnitude.toFixed(2)} m/s²`, 'impact');
                     } else if (eventTypeCode === 2) {
-                        showAlert('⚠️ DRIFT DETECTED', 'Position change detected', 'drift');
+                        showAlert('⚠️ DRIFT DETECTED', `Distance/Change: ${magnitude.toFixed(2)} m`, 'drift');
                     }
                 }
                 
-                // Update UI
+                // Update main event type display
                 const eventTypeEl = document.getElementById('eventType');
                 eventTypeEl.textContent = eventType;
                 eventTypeEl.className = `stat-value ${eventColor}`;
@@ -672,26 +672,30 @@
                 if (eventTypeCode === 1) {
                     eventWidget.classList.add('event-impact');
                     eventTypeBig.className = 'event-type-big text-danger';
+                    magnitudeBig.textContent = magnitude.toFixed(2) + ' m/s²';
                 } else if (eventTypeCode === 2) {
                     eventWidget.classList.add('event-drift');
                     eventTypeBig.className = 'event-type-big text-warning';
+                    magnitudeBig.textContent = magnitude.toFixed(2) + ' m';
                 } else if (eventTypeCode === 3) {
                     eventWidget.classList.add('event-status');
                     eventTypeBig.className = 'event-type-big text-accent';
+                    magnitudeBig.textContent = magnitude.toFixed(3) + ' m/s²';
                 } else {
                     eventWidget.classList.add('event-waiting');
                     eventTypeBig.className = 'event-type-big';
+                    magnitudeBig.textContent = '0.000';
                 }
                 
                 eventTypeBig.textContent = eventType;
                 eventDescriptionBig.textContent = eventSubtype;
-                magnitudeBig.textContent = magnitude.toFixed(3) + ' g';
                 
+                // Update stat cards
                 document.getElementById('magnitude').textContent = magnitude.toFixed(3);
                 document.getElementById('rssi').textContent = rssi;
                 document.getElementById('eventCount').textContent = eventCount;
                 
-                // Update buoy status
+                // Update buoy deployment status
                 const buoyStatusEl = document.getElementById('buoyStatus');
                 if (buoyStatusCode === 1) {
                     buoyStatusEl.innerHTML = '<span class="badge badge-purple">NOT DEPLOYED</span>';
@@ -699,6 +703,8 @@
                     buoyStatusEl.innerHTML = '<span class="badge badge-success">DEPLOYED</span>';
                 } else if (buoyStatusCode === 3) {
                     buoyStatusEl.innerHTML = '<span class="badge badge-warning">OVERRIDE MODE</span>';
+                } else {
+                    buoyStatusEl.innerHTML = '<span class="badge badge-neutral">UNKNOWN</span>';
                 }
                 
                 // Update GPS status
@@ -710,7 +716,7 @@
                 }
                 
                 // Update GPS coordinates
-                if (latitude !== 0 && longitude !== 0) {
+                if (latitude !== 0 && longitude !== 0 && gpsValid === 1) {
                     document.getElementById('latitude').textContent = latitude.toFixed(6) + '°';
                     document.getElementById('longitude').textContent = longitude.toFixed(6) + '°';
                 } else {
@@ -727,8 +733,8 @@
                     second: '2-digit'
                 });
                 
-                // Update chart
-                if (magnitude > 0) {
+                // Update chart with magnitude history
+                if (magnitude > 0 || eventTypeCode !== 3) {
                     magnitudeData.push(magnitude);
                     if (magnitudeData.length > maxDataPoints) {
                         magnitudeData.shift();
@@ -739,6 +745,7 @@
                     chart.update('none');
                 }
                 
+                // Store previous data for change detection
                 previousData = { eventCount, eventTypeCode };
                 
             } catch (error) {
