@@ -4,418 +4,207 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buoy Monitor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         :root {
-            --bg: #000000;
-            --surface: #0a0a0a;
-            --border: #1a1a1a;
-            --text-primary: #ffffff;
-            --text-secondary: #666666;
-            --text-muted: #333333;
-            --accent: #0ea5e9;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --purple: #a855f7;
+            --bg: #000000; --surface: #0a0a0a; --surface-elevated: #0f0f0f;
+            --border: #1a1a1a; --border-bright: #2a2a2a;
+            --text-primary: #ffffff; --text-secondary: #888888; --text-muted: #444444;
+            --accent: #0ea5e9; --accent-glow: rgba(14, 165, 233, 0.2);
+            --success: #10b981; --success-glow: rgba(16, 185, 129, 0.2);
+            --warning: #f59e0b; --warning-glow: rgba(245, 158, 11, 0.2);
+            --danger: #ef4444; --danger-glow: rgba(239, 68, 68, 0.2);
+            --purple: #a855f7; --purple-glow: rgba(168, 85, 247, 0.2);
         }
         
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg);
-            color: var(--text-primary);
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
+            font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-primary);
+            line-height: 1.5; -webkit-font-smoothing: antialiased;
+            background-image: radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.05) 0%, transparent 50%),
+                              radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.05) 0%, transparent 50%);
+            background-attachment: fixed;
         }
         
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
         
         header {
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border);
+            margin-bottom: 40px; padding-bottom: 25px; border-bottom: 1px solid var(--border); position: relative;
+        }
+        
+        header::after {
+            content: ''; position: absolute; bottom: -1px; left: 0; width: 100px; height: 2px;
+            background: linear-gradient(90deg, var(--accent), transparent);
         }
         
         h1 {
-            font-size: 1.75rem;
-            font-weight: 300;
-            letter-spacing: -0.5px;
-            margin-bottom: 4px;
+            font-size: 2rem; font-weight: 700; letter-spacing: -1px; margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff 0%, #888888 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
         
-        .subtitle {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
+        .subtitle { font-size: 0.875rem; color: var(--text-secondary); font-weight: 500; }
         
-        .status-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-        }
+        .status-row { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
         
         .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.813rem;
-            font-family: 'JetBrains Mono', monospace;
+            display: flex; align-items: center; gap: 10px; font-size: 0.813rem;
+            font-family: 'JetBrains Mono', monospace; font-weight: 600; letter-spacing: 0.5px;
         }
         
         .dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--success);
-            animation: pulse 2s ease-in-out infinite;
+            width: 8px; height: 8px; border-radius: 50%; background: var(--success);
+            box-shadow: 0 0 12px var(--success-glow); animation: pulse 2s ease-in-out infinite;
         }
         
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.9); } }
         
-        .time {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.813rem;
-            color: var(--text-secondary);
-        }
+        .time { font-family: 'JetBrains Mono', monospace; font-size: 0.813rem; color: var(--text-secondary); font-weight: 600; }
         
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-        
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px; }
         
         .widget {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            padding: 24px;
-            transition: border-color 0.2s;
+            background: var(--surface); border: 1px solid var(--border); padding: 28px;
+            transition: all 0.3s; position: relative; overflow: hidden;
         }
         
-        .widget:hover {
-            border-color: var(--text-muted);
+        .widget::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.03) 0%, transparent 50%);
+            opacity: 0; transition: opacity 0.3s;
         }
+        
+        .widget:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+        .widget:hover::before { opacity: 1; }
         
         .widget-title {
-            font-size: 0.688rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
+            font-size: 0.688rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1.5px; color: var(--text-secondary); margin-bottom: 18px;
         }
         
         .stat-value {
-            font-size: 2.5rem;
-            font-weight: 300;
-            font-family: 'JetBrains Mono', monospace;
-            letter-spacing: -1px;
-            line-height: 1;
+            font-size: 2.75rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -2px; line-height: 1; position: relative; z-index: 1;
         }
         
-        .stat-unit {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin-top: 4px;
-        }
+        .stat-unit { font-size: 0.875rem; color: var(--text-secondary); margin-top: 8px; font-weight: 500; }
         
-        .data-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+        .data-list { display: flex; flex-direction: column; gap: 16px; }
         
         .data-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: baseline;
+            padding-bottom: 16px; border-bottom: 1px solid var(--border);
         }
         
-        .data-item:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
+        .data-item:last-child { border-bottom: none; padding-bottom: 0; }
         
-        .data-label {
-            font-size: 0.813rem;
-            color: var(--text-secondary);
-        }
-        
-        .data-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
+        .data-label { font-size: 0.813rem; color: var(--text-secondary); font-weight: 500; }
+        .data-value { font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; font-weight: 600; }
         
         .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            font-size: 0.688rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 600;
-            text-transform: uppercase;
-            border: 1px solid;
+            display: inline-block; padding: 4px 10px; font-size: 0.688rem;
+            font-family: 'JetBrains Mono', monospace; font-weight: 700;
+            text-transform: uppercase; border: 1.5px solid; letter-spacing: 0.5px;
         }
         
-        .badge-success {
-            color: var(--success);
-            border-color: var(--success);
-            background: rgba(16, 185, 129, 0.1);
-        }
+        .badge-success { color: var(--success); border-color: var(--success); background: rgba(16, 185, 129, 0.1); box-shadow: 0 0 15px var(--success-glow); }
+        .badge-warning { color: var(--warning); border-color: var(--warning); background: rgba(245, 158, 11, 0.1); box-shadow: 0 0 15px var(--warning-glow); }
+        .badge-danger { color: var(--danger); border-color: var(--danger); background: rgba(239, 68, 68, 0.1); box-shadow: 0 0 15px var(--danger-glow); }
+        .badge-purple { color: var(--purple); border-color: var(--purple); background: rgba(168, 85, 247, 0.1); box-shadow: 0 0 15px var(--purple-glow); }
+        .badge-neutral { color: var(--text-secondary); border-color: var(--border-bright); background: rgba(255, 255, 255, 0.05); }
         
-        .badge-warning {
-            color: var(--warning);
-            border-color: var(--warning);
-            background: rgba(245, 158, 11, 0.1);
-        }
-        
-        .badge-danger {
-            color: var(--danger);
-            border-color: var(--danger);
-            background: rgba(239, 68, 68, 0.1);
-        }
-        
-        .badge-purple {
-            color: var(--purple);
-            border-color: var(--purple);
-            background: rgba(168, 85, 247, 0.1);
-        }
-        
-        .badge-neutral {
-            color: var(--text-secondary);
-            border-color: var(--border);
-            background: rgba(255, 255, 255, 0.05);
-        }
-        
-        .chart-container {
-            position: relative;
-            height: 180px;
-        }
+        .chart-container { position: relative; height: 200px; }
         
         .alert-banner {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 16px 20px;
-            background: var(--surface);
-            border: 1px solid;
-            max-width: 320px;
-            z-index: 1000;
-            animation: slideIn 0.3s ease;
-            display: none;
+            position: fixed; top: 20px; right: 20px; padding: 18px 22px; background: var(--surface-elevated);
+            border: 1px solid; max-width: 340px; z-index: 1000;
+            animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); display: none;
         }
         
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
+        @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         
-        .alert-banner.show {
-            display: block;
-        }
+        .alert-banner.show { display: block; }
+        .alert-banner.alert-impact { border-color: var(--danger); box-shadow: 0 8px 32px rgba(239, 68, 68, 0.3); }
+        .alert-banner.alert-drift { border-color: var(--warning); box-shadow: 0 8px 32px rgba(245, 158, 11, 0.3); }
         
-        .alert-banner.alert-impact {
-            border-color: var(--danger);
-        }
+        .alert-banner-title { font-size: 0.875rem; font-weight: 700; margin-bottom: 6px; letter-spacing: 0.3px; }
+        .alert-banner-text { font-size: 0.813rem; color: var(--text-secondary); font-weight: 500; }
         
-        .alert-banner.alert-drift {
-            border-color: var(--warning);
-        }
-        
-        .alert-banner-title {
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        
-        .alert-banner-text {
-            font-size: 0.813rem;
-            color: var(--text-secondary);
-        }
-        
-        .text-success { color: var(--success); }
-        .text-warning { color: var(--warning); }
-        .text-danger { color: var(--danger); }
-        .text-accent { color: var(--accent); }
-        .text-purple { color: var(--purple); }
+        .text-success { color: var(--success); text-shadow: 0 0 20px var(--success-glow); }
+        .text-warning { color: var(--warning); text-shadow: 0 0 20px var(--warning-glow); }
+        .text-danger { color: var(--danger); text-shadow: 0 0 20px var(--danger-glow); }
+        .text-accent { color: var(--accent); text-shadow: 0 0 20px var(--accent-glow); }
+        .text-purple { color: var(--purple); text-shadow: 0 0 20px var(--purple-glow); }
         
         .event-widget {
-            background: var(--surface);
-            border: 2px solid var(--border);
-            padding: 40px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s;
+            background: var(--surface); border: 2px solid var(--border); padding: 50px 40px;
+            text-align: center; position: relative; overflow: hidden; transition: all 0.4s;
         }
         
         .event-widget::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--text-muted);
-            transition: background 0.3s;
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+            background: var(--text-muted); transition: all 0.4s;
         }
         
-        .event-widget.event-impact::before {
-            background: var(--danger);
-        }
-        
-        .event-widget.event-drift::before {
-            background: var(--warning);
-        }
-        
-        .event-widget.event-status::before {
-            background: var(--accent);
-        }
-        
-        .event-widget.event-waiting::before {
-            background: var(--text-muted);
-        }
+        .event-widget.event-impact::before { background: var(--danger); box-shadow: 0 0 20px var(--danger-glow); }
+        .event-widget.event-drift::before { background: var(--warning); box-shadow: 0 0 20px var(--warning-glow); }
+        .event-widget.event-status::before { background: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
+        .event-widget.event-waiting::before { background: var(--text-muted); }
         
         .event-label {
-            font-size: 0.688rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
+            font-size: 0.688rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 2px; color: var(--text-secondary); margin-bottom: 20px;
         }
         
         .buoy-status-big {
-            font-size: 0.95rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 20px;
-            padding: 8px 20px;
-            display: inline-block;
-            border: 1px solid;
+            font-size: 1.1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px;
+            margin-bottom: 25px; padding: 10px 24px; display: inline-block;
+            border: 2px solid; transition: all 0.3s;
         }
         
-        .buoy-status-big.standby {
-            color: var(--purple);
-            border-color: var(--purple);
-            background: rgba(168, 85, 247, 0.1);
-        }
+        .buoy-status-big.standby { color: var(--purple); border-color: var(--purple); background: rgba(168, 85, 247, 0.1); box-shadow: 0 0 25px var(--purple-glow); }
+        .buoy-status-big.deploying { color: var(--warning); border-color: var(--warning); background: rgba(245, 158, 11, 0.1); box-shadow: 0 0 25px var(--warning-glow); animation: pulse-glow 2s infinite; }
+        .buoy-status-big.deployed { color: var(--success); border-color: var(--success); background: rgba(16, 185, 129, 0.1); box-shadow: 0 0 25px var(--success-glow); }
+        .buoy-status-big.override { color: var(--warning); border-color: var(--warning); background: rgba(245, 158, 11, 0.15); box-shadow: 0 0 25px var(--warning-glow); animation: pulse-glow 1.5s infinite; }
         
-        .buoy-status-big.deploying {
-            color: var(--warning);
-            border-color: var(--warning);
-            background: rgba(245, 158, 11, 0.1);
-        }
+        .buoy-status-big.offline { color: var(--danger); border-color: var(--danger); background: rgba(239, 68, 68, 0.15); box-shadow: 0 0 25px var(--danger-glow); animation: pulse-glow 1s infinite; }
         
-        .buoy-status-big.deployed {
-            color: var(--success);
-            border-color: var(--success);
-            background: rgba(16, 185, 129, 0.1);
-        }
-        
-        .buoy-status-big.override {
-            color: var(--warning);
-            border-color: var(--warning);
-            background: rgba(245, 158, 11, 0.15);
-        }
+        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 25px var(--warning-glow); } 50% { box-shadow: 0 0 35px var(--warning-glow), 0 0 50px var(--warning-glow); } }
         
         .event-type-big {
-            font-size: 4rem;
-            font-weight: 300;
-            font-family: 'JetBrains Mono', monospace;
-            letter-spacing: -2px;
-            line-height: 1;
-            margin-bottom: 12px;
-            transition: color 0.3s;
+            font-size: 4.5rem; font-weight: 800; font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -3px; line-height: 1; margin-bottom: 16px; transition: all 0.3s;
         }
         
-        .event-description {
-            font-size: 1rem;
-            color: var(--text-secondary);
-            margin-bottom: 24px;
-        }
+        .event-description { font-size: 1.05rem; color: var(--text-secondary); margin-bottom: 28px; font-weight: 500; }
         
         .event-magnitude-display {
-            display: inline-block;
-            padding: 12px 24px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.5rem;
-            font-weight: 500;
-            margin-top: 8px;
+            display: inline-block; padding: 14px 28px; background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-bright); font-family: 'JetBrains Mono', monospace;
+            font-size: 1.6rem; font-weight: 700; margin-top: 10px; letter-spacing: -0.5px;
         }
         
         footer {
-            margin-top: 60px;
-            padding-top: 30px;
-            border-top: 1px solid var(--border);
-            text-align: center;
-            color: var(--text-secondary);
-            font-size: 0.813rem;
+            margin-top: 60px; padding-top: 30px; border-top: 1px solid var(--border);
+            text-align: center; color: var(--text-secondary); font-size: 0.813rem;
         }
         
-        .developer-name {
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-        
-        .instagram-link {
-            color: var(--accent);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-        
-        .instagram-link:hover {
-            color: var(--text-primary);
-        }
+        .developer-name { font-weight: 700; color: var(--text-primary); }
+        .instagram-link { color: var(--accent); text-decoration: none; transition: color 0.2s; font-weight: 600; }
+        .instagram-link:hover { color: var(--text-primary); }
         
         @media (max-width: 768px) {
-            .grid-2 {
-                grid-template-columns: 1fr;
-            }
-            
-            .container {
-                padding: 20px 16px;
-            }
-            
-            h1 {
-                font-size: 1.5rem;
-            }
-            
-            .event-widget {
-                padding: 30px 20px;
-            }
-            
-            .event-type-big {
-                font-size: 2.5rem;
-            }
-            
-            .event-magnitude-display {
-                font-size: 1.2rem;
-                padding: 10px 20px;
-            }
+            .grid-2 { grid-template-columns: 1fr; }
+            .container { padding: 20px 16px; }
+            h1 { font-size: 1.75rem; }
+            .event-widget { padding: 35px 25px; }
+            .event-type-big { font-size: 3rem; }
+            .buoy-status-big { font-size: 0.95rem; padding: 8px 18px; }
+            .event-magnitude-display { font-size: 1.3rem; padding: 12px 22px; }
         }
     </style>
 </head>
@@ -425,10 +214,7 @@
             <h1>Buoy Monitoring System</h1>
             <p class="subtitle">Real-time seismic buoy data stream</p>
             <div class="status-row">
-                <div class="status-indicator">
-                    <div class="dot"></div>
-                    <span>LIVE</span>
-                </div>
+                <div class="status-indicator"><div class="dot"></div><span>LIVE</span></div>
                 <div class="time" id="currentTime">--:--:--</div>
             </div>
         </header>
@@ -444,54 +230,23 @@
         <br>
         
         <div class="grid">
-            <div class="widget">
-                <div class="widget-title">Event Type</div>
-                <div class="stat-value" id="eventType">--</div>
-                <div class="stat-unit" id="eventSubtype">Waiting for data</div>
-            </div>
-            
-            <div class="widget">
-                <div class="widget-title">Magnitude</div>
-                <div class="stat-value" id="magnitude">--</div>
-                <div class="stat-unit">g-force</div>
-            </div>
-            
-            <div class="widget">
-                <div class="widget-title">Signal Strength</div>
-                <div class="stat-value" id="rssi">--</div>
-                <div class="stat-unit">dBm</div>
-            </div>
-            
-            <div class="widget">
-                <div class="widget-title">Total Events</div>
-                <div class="stat-value" id="eventCount">0</div>
-                <div class="stat-unit">recorded</div>
-            </div>
+            <div class="widget"><div class="widget-title">Event Type</div><div class="stat-value" id="eventType">--</div><div class="stat-unit" id="eventSubtype">Waiting for data</div></div>
+            <div class="widget"><div class="widget-title">Magnitude</div><div class="stat-value" id="magnitude">--</div><div class="stat-unit">m/s² or meters</div></div>
+            <div class="widget"><div class="widget-title">Signal Strength</div><div class="stat-value" id="rssi">--</div><div class="stat-unit">dBm</div></div>
+            <div class="widget"><div class="widget-title">Total Events</div><div class="stat-value" id="eventCount">0</div><div class="stat-unit">recorded</div></div>
         </div>
         
         <div class="grid-2">
             <div class="widget">
                 <div class="widget-title">Magnitude History</div>
-                <div class="chart-container">
-                    <canvas id="magnitudeChart"></canvas>
-                </div>
+                <div class="chart-container"><canvas id="magnitudeChart"></canvas></div>
             </div>
-            
             <div class="widget">
                 <div class="widget-title">System Status</div>
                 <div class="data-list">
-                    <div class="data-item">
-                        <span class="data-label">Buoy Status</span>
-                        <span class="data-value" id="buoyStatus">--</span>
-                    </div>
-                    <div class="data-item">
-                        <span class="data-label">GPS Status</span>
-                        <span class="data-value" id="gpsStatus">--</span>
-                    </div>
-                    <div class="data-item">
-                        <span class="data-label">Last Update</span>
-                        <span class="data-value" id="lastUpdate">--</span>
-                    </div>
+                    <div class="data-item"><span class="data-label">Buoy Status</span><span class="data-value" id="buoyStatus">--</span></div>
+                    <div class="data-item"><span class="data-label">GPS Status</span><span class="data-value" id="gpsStatus">--</span></div>
+                    <div class="data-item"><span class="data-label">Last Update</span><span class="data-value" id="lastUpdate">--</span></div>
                 </div>
             </div>
         </div>
@@ -500,24 +255,14 @@
             <div class="widget">
                 <div class="widget-title">GPS Coordinates</div>
                 <div class="data-list">
-                    <div class="data-item">
-                        <span class="data-label">Latitude</span>
-                        <span class="data-value" id="latitude">--</span>
-                    </div>
-                    <div class="data-item">
-                        <span class="data-label">Longitude</span>
-                        <span class="data-value" id="longitude">--</span>
-                    </div>
+                    <div class="data-item"><span class="data-label">Latitude</span><span class="data-value" id="latitude">--</span></div>
+                    <div class="data-item"><span class="data-label">Longitude</span><span class="data-value" id="longitude">--</span></div>
                 </div>
             </div>
-            
             <div class="widget">
                 <div class="widget-title">Debug Info</div>
                 <div class="data-list">
-                    <div class="data-item">
-                        <span class="data-label">Raw Data</span>
-                        <span class="data-value" id="debugInfo">--</span>
-                    </div>
+                    <div class="data-item"><span class="data-label">Raw Data</span><span class="data-value" id="debugInfo">--</span></div>
                 </div>
             </div>
         </div>
@@ -534,117 +279,64 @@
     </div>
 
     <script>
-        // Configuration
-        const CHANNEL_ID = '3203006';
-        const READ_API_KEY = 'JN2TR7S7XJLS9TWW';
-        const REFRESH_INTERVAL = 15000; // 15 seconds to match ThingSpeak update rate
+        const CHANNEL_ID = '3203006', READ_API_KEY = 'JN2TR7S7XJLS9TWW', REFRESH_INTERVAL = 15000;
         const API_URL = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json?api_key=${READ_API_KEY}`;
+        const RECEIVER_TIMEOUT = 45000; // 45 seconds - receiver considered offline if no updates
         
-        // Chart Setup
+        let lastUpdateTime = Date.now();
+        let receiverOnline = true;
+        
         const ctx = document.getElementById('magnitudeChart').getContext('2d');
-        const magnitudeData = [];
-        const maxDataPoints = 20;
+        const magnitudeData = [], maxDataPoints = 20;
         
         const chart = new Chart(ctx, {
             type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    data: [],
-                    borderColor: '#0ea5e9',
-                    backgroundColor: 'rgba(14, 165, 233, 0.1)',
-                    borderWidth: 1.5,
-                    tension: 0.3,
-                    pointRadius: 0,
-                    pointHoverRadius: 4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                        padding: 8,
-                        displayColors: false,
-                        callbacks: {
-                            title: () => '',
-                            label: (context) => `${context.parsed.y.toFixed(3)} g`
-                        }
-                    }
-                },
-                scales: {
-                    x: { display: false },
-                    y: {
-                        border: { display: false },
-                        grid: {
-                            color: '#1a1a1a',
-                            drawTicks: false
-                        },
-                        ticks: {
-                            color: '#666666',
-                            font: { size: 10, family: 'JetBrains Mono' },
-                            padding: 8,
-                            callback: (value) => value.toFixed(2)
-                        }
-                    }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
-                }
-            }
+            data: { labels: [], datasets: [{ data: [], borderColor: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.1)', borderWidth: 2, tension: 0.4, pointRadius: 0, pointHoverRadius: 5, fill: true }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(0, 0, 0, 0.9)', padding: 10, displayColors: false, callbacks: { title: () => '', label: (c) => `${c.parsed.y.toFixed(3)} m/s²` } } }, scales: { x: { display: false }, y: { border: { display: false }, grid: { color: '#1a1a1a', drawTicks: false }, ticks: { color: '#888888', font: { size: 10, family: 'JetBrains Mono' }, padding: 8, callback: (v) => v.toFixed(2) } } }, interaction: { intersect: false, mode: 'index' } }
         });
         
         let previousData = {};
         
         function updateClock() {
             const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
+            document.getElementById('currentTime').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
         }
-        
-        setInterval(updateClock, 1000);
-        updateClock();
+        setInterval(updateClock, 1000); updateClock();
         
         function showAlert(title, text, type = 'impact') {
             const banner = document.getElementById('alertBanner');
             document.getElementById('alertTitle').textContent = title;
             document.getElementById('alertText').textContent = text;
-            
             banner.className = 'alert-banner show alert-' + type;
-            
-            setTimeout(() => {
-                banner.classList.remove('show');
-            }, 5000);
+            setTimeout(() => banner.classList.remove('show'), 5000);
         }
         
         async function fetchData() {
             try {
-                console.log('Fetching from:', API_URL);
                 const response = await fetch(API_URL);
                 const data = await response.json();
+                if (!data || !data.created_at) return;
                 
-                console.log('Received data:', data);
+                // Check if data is fresh (updated recently)
+                const dataTime = new Date(data.created_at).getTime();
+                const now = Date.now();
+                const dataAge = now - dataTime;
                 
-                if (!data || !data.created_at) {
-                    console.error('Invalid data received');
-                    return;
+                // If data is older than 45 seconds, receiver might be offline
+                if (dataAge > RECEIVER_TIMEOUT) {
+                    if (receiverOnline) {
+                        receiverOnline = false;
+                        showAlert('⚠️ RECEIVER OFFLINE', 'WiFi connection lost or receiver stopped', 'impact');
+                        document.querySelector('.dot').style.background = 'var(--danger)';
+                    }
+                } else {
+                    if (!receiverOnline) {
+                        receiverOnline = true;
+                        showAlert('✅ RECEIVER ONLINE', 'Connection restored', 'drift');
+                        document.querySelector('.dot').style.background = 'var(--success)';
+                    }
+                    lastUpdateTime = now;
                 }
-                
-                // CORRECT FIELD MAPPING:
-                // Field 1: Event Type (1=IMPACT, 2=DRIFT, 3=STATUS)
-                // Field 2: Magnitude (m/s² or meters for drift)
-                // Field 3: Latitude
-                // Field 4: Longitude
-                // Field 5: RSSI
-                // Field 6: GPS Valid (1/0)
-                // Field 7: Event Count
-                // Field 8: Buoy Status (1=Not Deployed, 2=Deployed Normal, 3=Deployed Override)
                 
                 const eventTypeCode = parseInt(data.field1) || 3;
                 const magnitude = parseFloat(data.field2) || 0;
@@ -655,74 +347,45 @@
                 const eventCount = parseInt(data.field7) || 0;
                 const buoyStatusCode = parseInt(data.field8) || 1;
                 
-                // Map buoy status (1=Standby, 2=Deploying, 3=Deployed, 4=Override)
-                let buoyStatusText = 'STANDBY';
-                let buoyStatusClass = 'standby';
+                // Map buoy status (1=Standby, 2=Deploying, 3=Deployed, 4=Override, 5=Offline)
+                let buoyStatusText = 'STANDBY', buoyStatusClass = 'standby';
+                if (buoyStatusCode === 2) { buoyStatusText = 'DEPLOYING'; buoyStatusClass = 'deploying'; }
+                else if (buoyStatusCode === 3) { buoyStatusText = 'DEPLOYED'; buoyStatusClass = 'deployed'; }
+                else if (buoyStatusCode === 4) { buoyStatusText = 'OVERRIDE'; buoyStatusClass = 'override'; }
+                else if (buoyStatusCode === 5) { buoyStatusText = 'BUOY OFFLINE'; buoyStatusClass = 'offline'; }
                 
-                if (buoyStatusCode === 1) {
-                    buoyStatusText = 'STANDBY';
-                    buoyStatusClass = 'standby';
-                } else if (buoyStatusCode === 2) {
-                    buoyStatusText = 'DEPLOYING';
-                    buoyStatusClass = 'deploying';
-                } else if (buoyStatusCode === 3) {
-                    buoyStatusText = 'DEPLOYED';
-                    buoyStatusClass = 'deployed';
-                } else if (buoyStatusCode === 4) {
-                    buoyStatusText = 'OVERRIDE';
-                    buoyStatusClass = 'override';
-                }
+                document.getElementById('debugInfo').textContent = `Type:${eventTypeCode} Mag:${magnitude} GPS:${gpsValid} Status:${buoyStatusCode} (${buoyStatusText}) Age:${Math.floor(dataAge/1000)}s`;
                 
-                // Debug info - show raw values
-                document.getElementById('debugInfo').textContent = 
-                    `Type:${eventTypeCode} Mag:${magnitude} GPS:${gpsValid} Status:${buoyStatusCode} (${buoyStatusText})`;
+                let eventType = 'WAITING', eventSubtype = 'No events', eventColor = 'text-accent';
+                if (eventTypeCode === 1) { eventType = 'IMPACT'; eventSubtype = 'High acceleration detected'; eventColor = 'text-danger'; }
+                else if (eventTypeCode === 2) { eventType = 'DRIFT'; eventSubtype = 'Position or orientation change'; eventColor = 'text-warning'; }
+                else if (eventTypeCode === 3) { eventType = 'STATUS'; eventSubtype = 'System status update'; eventColor = 'text-accent'; }
                 
-                // Map event type to display
-                let eventType = 'WAITING';
-                let eventSubtype = 'No events';
-                let eventColor = 'text-accent';
-                
-                switch(eventTypeCode) {
-                    case 1:
-                        eventType = 'IMPACT';
-                        eventSubtype = 'High acceleration detected';
-                        eventColor = 'text-danger';
-                        break;
-                    case 2:
-                        eventType = 'DRIFT';
-                        eventSubtype = 'Position or orientation change';
-                        eventColor = 'text-warning';
-                        break;
-                    case 3:
-                        eventType = 'STATUS';
-                        eventSubtype = 'System status update';
-                        eventColor = 'text-accent';
-                        break;
-                }
-                
-                // Check for new events and show alerts
                 if (previousData.eventCount !== undefined && eventCount > previousData.eventCount) {
-                    if (eventTypeCode === 1) {
-                        showAlert('⚠️ IMPACT DETECTED', `Magnitude: ${magnitude.toFixed(2)} m/s²`, 'impact');
-                    } else if (eventTypeCode === 2) {
-                        showAlert('⚠️ DRIFT DETECTED', `Distance/Change: ${magnitude.toFixed(2)} m`, 'drift');
-                    }
+                    if (eventTypeCode === 1) showAlert('⚠️ IMPACT DETECTED', `Magnitude: ${magnitude.toFixed(2)} m/s²`, 'impact');
+                    else if (eventTypeCode === 2) showAlert('⚠️ DRIFT DETECTED', `Distance/Change: ${magnitude.toFixed(2)} m`, 'drift');
                 }
                 
-                // Update main event type display
+                // Check for buoy going offline
+                if (previousData.buoyStatusCode !== undefined && previousData.buoyStatusCode !== 5 && buoyStatusCode === 5) {
+                    showAlert('❌ BUOY OFFLINE', 'Transmitter signal lost', 'impact');
+                }
+                
+                // Check for buoy coming back online
+                if (previousData.buoyStatusCode !== undefined && previousData.buoyStatusCode === 5 && buoyStatusCode !== 5) {
+                    showAlert('✅ BUOY ONLINE', 'Transmitter signal restored', 'drift');
+                }
+                
                 const eventTypeEl = document.getElementById('eventType');
-                eventTypeEl.textContent = eventType;
-                eventTypeEl.className = `stat-value ${eventColor}`;
+                eventTypeEl.textContent = eventType; eventTypeEl.className = `stat-value ${eventColor}`;
                 document.getElementById('eventSubtype').textContent = eventSubtype;
                 
-                // Update BIG Event Widget
                 const eventWidget = document.getElementById('eventWidget');
                 const eventTypeBig = document.getElementById('eventTypeBig');
                 const eventDescriptionBig = document.getElementById('eventDescriptionBig');
                 const magnitudeBig = document.getElementById('magnitudeBig');
                 const buoyStatusBig = document.getElementById('buoyStatusBig');
                 
-                // Update buoy status badge
                 buoyStatusBig.textContent = buoyStatusText;
                 buoyStatusBig.className = `buoy-status-big ${buoyStatusClass}`;
                 
@@ -749,34 +412,22 @@
                 eventTypeBig.textContent = eventType;
                 eventDescriptionBig.textContent = eventSubtype;
                 
-                // Update stat cards
                 document.getElementById('magnitude').textContent = magnitude.toFixed(3);
                 document.getElementById('rssi').textContent = rssi;
                 document.getElementById('eventCount').textContent = eventCount;
                 
-                // Update buoy deployment status in side panel
                 const buoyStatusEl = document.getElementById('buoyStatus');
-                if (buoyStatusCode === 1) {
-                    buoyStatusEl.innerHTML = '<span class="badge badge-purple">STANDBY</span>';
-                } else if (buoyStatusCode === 2) {
-                    buoyStatusEl.innerHTML = '<span class="badge badge-warning">DEPLOYING</span>';
-                } else if (buoyStatusCode === 3) {
-                    buoyStatusEl.innerHTML = '<span class="badge badge-success">DEPLOYED</span>';
-                } else if (buoyStatusCode === 4) {
-                    buoyStatusEl.innerHTML = '<span class="badge badge-warning">OVERRIDE</span>';
-                } else {
-                    buoyStatusEl.innerHTML = '<span class="badge badge-neutral">UNKNOWN</span>';
-                }
+                if (buoyStatusCode === 1) buoyStatusEl.innerHTML = '<span class="badge badge-purple">STANDBY</span>';
+                else if (buoyStatusCode === 2) buoyStatusEl.innerHTML = '<span class="badge badge-warning">DEPLOYING</span>';
+                else if (buoyStatusCode === 3) buoyStatusEl.innerHTML = '<span class="badge badge-success">DEPLOYED</span>';
+                else if (buoyStatusCode === 4) buoyStatusEl.innerHTML = '<span class="badge badge-warning">OVERRIDE</span>';
+                else if (buoyStatusCode === 5) buoyStatusEl.innerHTML = '<span class="badge badge-danger">BUOY OFFLINE</span>';
+                else buoyStatusEl.innerHTML = '<span class="badge badge-neutral">UNKNOWN</span>';
                 
-                // Update GPS status
                 const gpsEl = document.getElementById('gpsStatus');
-                if (gpsValid === 1) {
-                    gpsEl.innerHTML = '<span class="badge badge-success">LOCKED</span>';
-                } else {
-                    gpsEl.innerHTML = '<span class="badge badge-danger">NO LOCK</span>';
-                }
+                if (gpsValid === 1) gpsEl.innerHTML = '<span class="badge badge-success">LOCKED</span>';
+                else gpsEl.innerHTML = '<span class="badge badge-danger">NO LOCK</span>';
                 
-                // Update GPS coordinates
                 if (latitude !== 0 && longitude !== 0 && gpsValid === 1) {
                     document.getElementById('latitude').textContent = latitude.toFixed(6) + '°';
                     document.getElementById('longitude').textContent = longitude.toFixed(6) + '°';
@@ -785,37 +436,29 @@
                     document.getElementById('longitude').textContent = 'NO DATA';
                 }
                 
-                // Update last update time
                 const updateTime = new Date(data.created_at);
-                document.getElementById('lastUpdate').textContent = updateTime.toLocaleTimeString('en-US', { 
-                    hour12: false,
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
+                document.getElementById('lastUpdate').textContent = updateTime.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 
-                // Update chart with magnitude history
                 if (magnitude > 0 || eventTypeCode !== 3) {
                     magnitudeData.push(magnitude);
-                    if (magnitudeData.length > maxDataPoints) {
-                        magnitudeData.shift();
-                    }
-                    
+                    if (magnitudeData.length > maxDataPoints) magnitudeData.shift();
                     chart.data.labels = magnitudeData.map((_, i) => i + 1);
                     chart.data.datasets[0].data = magnitudeData;
                     chart.update('none');
                 }
                 
-                // Store previous data for change detection
-                previousData = { eventCount, eventTypeCode };
-                
+                previousData = { eventCount, eventTypeCode, buoyStatusCode };
             } catch (error) {
-                console.error('Error fetching data:', error);
+                console.error('Error:', error);
                 document.getElementById('debugInfo').textContent = 'ERROR: ' + error.message;
+                if (receiverOnline) {
+                    receiverOnline = false;
+                    showAlert('⚠️ CONNECTION ERROR', 'Failed to fetch data', 'impact');
+                    document.querySelector('.dot').style.background = 'var(--danger)';
+                }
             }
         }
         
-        // Initial fetch and set interval
         fetchData();
         setInterval(fetchData, REFRESH_INTERVAL);
     </script>
