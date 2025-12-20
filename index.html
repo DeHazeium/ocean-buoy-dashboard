@@ -240,7 +240,7 @@
         let chart, prevData = {}, timeline = [], soundOn = false, firstLoad = true, magnitudeHistory = [];
         let currentDeployed = null, currentOverride = null, currentEventType = null;
         
-        const EVENT_TYPES = { 0: 'STATUS', 1: 'IMPACT', 2: 'GPS_DRIFT', 3: 'ACCEL_DRIFT' };
+        const EVENT_TYPES = { 0: 'OFFLINE', 1: 'STATUS', 2: 'DRIFT', 3: 'IMPACT' };
         
         chart = new Chart(document.getElementById('chart'), {
             type: 'line',
@@ -306,29 +306,30 @@
             }
         }
         
-        function updateBanner(deployed, override, eventType) {
+        function updateBanner(online, deployed, override, eventType) {
             const banner = document.getElementById('statusBanner');
             const container = document.getElementById('mainContainer');
             let html = '';
             
-            if (!deployed) {
-                html = `<div class="status-banner banner-not-deployed">
-                    <div class="banner-content">
-                        <div class="banner-icon">⚠️</div>
-                        <div class="banner-text">
-                            <div class="banner-title">System Not Deployed</div>
-                            <div class="banner-subtitle">Buoy is in free/test mode - Deploy to activate monitoring</div>
-                        </div>
-                    </div>
-                </div>`;
-                container.classList.add('has-banner');
-            } else if (override) {
+            // Priority order: Override > Not Deployed > Event Alerts > Offline
+            if (override === '1') {
                 html = `<div class="status-banner banner-override">
                     <div class="banner-content">
                         <div class="banner-icon">🔧</div>
                         <div class="banner-text">
                             <div class="banner-title">Override Mode Active</div>
                             <div class="banner-subtitle">Manual control enabled - System thresholds bypassed</div>
+                        </div>
+                    </div>
+                </div>`;
+                container.classList.add('has-banner');
+            } else if (deployed === '0') {
+                html = `<div class="status-banner banner-not-deployed">
+                    <div class="banner-content">
+                        <div class="banner-icon">⚠️</div>
+                        <div class="banner-text">
+                            <div class="banner-title">System Not Deployed</div>
+                            <div class="banner-subtitle">Buoy is in free/test mode - Deploy to activate monitoring</div>
                         </div>
                     </div>
                 </div>`;
@@ -345,16 +346,27 @@
                     <button class="banner-action" onclick="document.getElementById('maintenanceBtn').click()">Clear Alert</button>
                 </div>`;
                 container.classList.add('has-banner');
-            } else if (eventType === 'GPS_DRIFT' || eventType === 'ACCEL_DRIFT') {
+            } else if (eventType === 'DRIFT') {
                 html = `<div class="status-banner banner-drift">
                     <div class="banner-content">
                         <div class="banner-icon">🌊</div>
                         <div class="banner-text">
                             <div class="banner-title">Drift Alert Active</div>
-                            <div class="banner-subtitle">${eventType === 'GPS_DRIFT' ? 'Position' : 'Orientation'} drift detected - Monitor closely</div>
+                            <div class="banner-subtitle">Position drift detected - Monitor closely</div>
                         </div>
                     </div>
                     <button class="banner-action" onclick="document.getElementById('maintenanceBtn').click()">Clear Alert</button>
+                </div>`;
+                container.classList.add('has-banner');
+            } else if (online === '0') {
+                html = `<div class="status-banner banner-impact">
+                    <div class="banner-content">
+                        <div class="banner-icon">📡</div>
+                        <div class="banner-text">
+                            <div class="banner-title">Buoy Offline</div>
+                            <div class="banner-subtitle">No signal received - Connection lost</div>
+                        </div>
+                    </div>
                 </div>`;
                 container.classList.add('has-banner');
             } else {
@@ -364,7 +376,7 @@
             banner.innerHTML = html;
             
             const maintenanceBtn = document.getElementById('maintenanceBtn');
-            if (eventType === 'IMPACT' || eventType === 'GPS_DRIFT' || eventType === 'ACCEL_DRIFT') {
+            if (eventType === 'IMPACT' || eventType === 'DRIFT') {
                 maintenanceBtn.style.display = 'flex';
             } else {
                 maintenanceBtn.style.display = 'none';
@@ -422,17 +434,20 @@
                 return;
             }
             
-            if (data.eventType !== prevData.eventType && data.eventType !== 'STATUS') {
+            if (data.eventType !== prevData.eventType) {
                 let notifyType = 'info';
                 if (data.eventType === 'IMPACT') notifyType = 'danger';
-                else if (data.eventType === 'GPS_DRIFT' || data.eventType === 'ACCEL_DRIFT') notifyType = 'warning';
+                else if (data.eventType === 'DRIFT') notifyType = 'warning';
+                else if (data.eventType === 'OFFLINE') notifyType = 'danger';
                 
-                notify('New Event', `Type: ${data.eventType}`, notifyType);
-                highlight('lastEventType');
-                
-                timeline.unshift({ type: data.eventType, mag: data.magnitude, time: Date.now() });
-                if (timeline.length > 10) timeline.pop();
-                renderTimeline();
+                if (data.eventType !== 'STATUS' && data.eventType !== 'OFFLINE') {
+                    notify('New Event', `Type: ${data.eventType}`, notifyType);
+                    highlight('lastEventType');
+                    
+                    timeline.unshift({ type: data.eventType, mag: data.magnitude, time: Date.now() });
+                    if (timeline.length > 10) timeline.pop();
+                    renderTimeline();
+                }
             }
             
             if (parseInt(data.eventCounter) > parseInt(prevData.eventCounter || 0)) {
@@ -455,6 +470,14 @@
             
             if (data.magnitude !== prevData.magnitude) {
                 highlight('magnitude');
+            }
+            
+            if (data.online !== prevData.online) {
+                if (data.online === '1') {
+                    notify('Buoy Online', 'Connection established', 'success');
+                } else {
+                    notify('Buoy Offline', 'Connection lost', 'danger');
+                }
             }
             
             if (data.deployed !== prevData.deployed) {
@@ -493,14 +516,15 @@
                 const eventType = EVENT_TYPES[eventTypeCode] || 'UNKNOWN';
                 
                 const parsed = {
+                    online: data.field1 || '0',
                     eventType: eventType,
-                    magnitude: data.field2 || '--',
-                    lat: data.field3,
-                    lon: data.field4,
+                    magnitude: data.field3 || '--',
+                    rssi: data.field4 || '--',
                     gpsValid: data.field5,
-                    rssi: data.field6,
-                    totalPackets: data.field7 || '0',
-                    eventCounter: data.field8 || '0',
+                    lat: data.field6,
+                    lon: data.field7,
+                    totalPackets: data.field8 || '0',
+                    eventCounter: '0',
                     deployed: data.field10 || '0',
                     override: data.field11 || '0'
                 };
@@ -508,7 +532,10 @@
                 const dot = document.getElementById('statusDot');
                 const statusText = document.getElementById('statusText');
                 
-                if (parsed.deployed === '0') {
+                if (parsed.online === '0') {
+                    dot.className = 'status-dot';
+                    statusText.textContent = 'OFFLINE';
+                } else if (parsed.deployed === '0') {
                     dot.className = 'status-dot not-deployed';
                     statusText.textContent = 'NOT DEPLOYED';
                 } else if (parsed.override === '1') {
@@ -519,7 +546,7 @@
                     statusText.textContent = 'CONNECTED';
                 }
                 
-                updateBanner(parsed.deployed === '1', parsed.override === '1', parsed.eventType);
+                updateBanner(parsed.online, parsed.deployed, parsed.override, parsed.eventType);
                 checkChanges(parsed);
                 
                 if (parsed.magnitude !== '--') {
@@ -534,7 +561,7 @@
                 }
                 
                 document.getElementById('eventCount').textContent = parsed.eventCounter;
-                document.getElementById('rssi').textContent = parsed.rssi || '--';
+                document.getElementById('rssi').textContent = parsed.rssi;
                 document.getElementById('magnitude').textContent = parsed.magnitude;
                 document.getElementById('totalPackets').textContent = parsed.totalPackets;
                 
@@ -544,15 +571,15 @@
                 if (parsed.eventType === 'IMPACT') {
                     eventEl.style.color = 'var(--danger)';
                     document.getElementById('eventTypeSub').textContent = 'High energy detection';
-                } else if (parsed.eventType === 'GPS_DRIFT') {
+                } else if (parsed.eventType === 'DRIFT') {
                     eventEl.style.color = 'var(--warning)';
                     document.getElementById('eventTypeSub').textContent = 'Position drift detected';
-                } else if (parsed.eventType === 'ACCEL_DRIFT') {
-                    eventEl.style.color = 'var(--warning)';
-                    document.getElementById('eventTypeSub').textContent = 'Orientation change';
                 } else if (parsed.eventType === 'STATUS') {
                     eventEl.style.color = 'var(--accent)';
                     document.getElementById('eventTypeSub').textContent = 'Status update';
+                } else if (parsed.eventType === 'OFFLINE') {
+                    eventEl.style.color = 'var(--danger)';
+                    document.getElementById('eventTypeSub').textContent = 'Connection lost';
                 } else {
                     eventEl.style.color = 'var(--text-primary)';
                     document.getElementById('eventTypeSub').textContent = 'Event classification';
