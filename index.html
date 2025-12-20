@@ -305,6 +305,41 @@
             margin-bottom: 16px;
         }
         
+        .buoy-status-big {
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 20px;
+            padding: 8px 20px;
+            display: inline-block;
+            border: 1px solid;
+        }
+        
+        .buoy-status-big.standby {
+            color: var(--purple);
+            border-color: var(--purple);
+            background: rgba(168, 85, 247, 0.1);
+        }
+        
+        .buoy-status-big.deploying {
+            color: var(--warning);
+            border-color: var(--warning);
+            background: rgba(245, 158, 11, 0.1);
+        }
+        
+        .buoy-status-big.deployed {
+            color: var(--success);
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .buoy-status-big.override {
+            color: var(--warning);
+            border-color: var(--warning);
+            background: rgba(245, 158, 11, 0.15);
+        }
+        
         .event-type-big {
             font-size: 4rem;
             font-weight: 300;
@@ -400,9 +435,10 @@
         
         <div class="event-widget event-waiting" id="eventWidget">
             <div class="event-label">Current Event</div>
+            <div class="buoy-status-big standby" id="buoyStatusBig">STANDBY</div>
             <div class="event-type-big" id="eventTypeBig">WAITING</div>
             <div class="event-description" id="eventDescriptionBig">No events detected</div>
-            <div class="event-magnitude-display" id="magnitudeBig">0.000 g</div>
+            <div class="event-magnitude-display" id="magnitudeBig">0.000 m/s²</div>
         </div>
         
         <br>
@@ -619,9 +655,27 @@
                 const eventCount = parseInt(data.field7) || 0;
                 const buoyStatusCode = parseInt(data.field8) || 1;
                 
+                // Map buoy status (1=Standby, 2=Deploying, 3=Deployed, 4=Override)
+                let buoyStatusText = 'STANDBY';
+                let buoyStatusClass = 'standby';
+                
+                if (buoyStatusCode === 1) {
+                    buoyStatusText = 'STANDBY';
+                    buoyStatusClass = 'standby';
+                } else if (buoyStatusCode === 2) {
+                    buoyStatusText = 'DEPLOYING';
+                    buoyStatusClass = 'deploying';
+                } else if (buoyStatusCode === 3) {
+                    buoyStatusText = 'DEPLOYED';
+                    buoyStatusClass = 'deployed';
+                } else if (buoyStatusCode === 4) {
+                    buoyStatusText = 'OVERRIDE';
+                    buoyStatusClass = 'override';
+                }
+                
                 // Debug info - show raw values
                 document.getElementById('debugInfo').textContent = 
-                    `Type:${eventTypeCode} Mag:${magnitude} GPS:${gpsValid} Status:${buoyStatusCode}`;
+                    `Type:${eventTypeCode} Mag:${magnitude} GPS:${gpsValid} Status:${buoyStatusCode} (${buoyStatusText})`;
                 
                 // Map event type to display
                 let eventType = 'WAITING';
@@ -666,6 +720,11 @@
                 const eventTypeBig = document.getElementById('eventTypeBig');
                 const eventDescriptionBig = document.getElementById('eventDescriptionBig');
                 const magnitudeBig = document.getElementById('magnitudeBig');
+                const buoyStatusBig = document.getElementById('buoyStatusBig');
+                
+                // Update buoy status badge
+                buoyStatusBig.textContent = buoyStatusText;
+                buoyStatusBig.className = `buoy-status-big ${buoyStatusClass}`;
                 
                 eventWidget.classList.remove('event-impact', 'event-drift', 'event-status', 'event-waiting');
                 
@@ -695,14 +754,16 @@
                 document.getElementById('rssi').textContent = rssi;
                 document.getElementById('eventCount').textContent = eventCount;
                 
-                // Update buoy deployment status
+                // Update buoy deployment status in side panel
                 const buoyStatusEl = document.getElementById('buoyStatus');
                 if (buoyStatusCode === 1) {
-                    buoyStatusEl.innerHTML = '<span class="badge badge-purple">NOT DEPLOYED</span>';
+                    buoyStatusEl.innerHTML = '<span class="badge badge-purple">STANDBY</span>';
                 } else if (buoyStatusCode === 2) {
-                    buoyStatusEl.innerHTML = '<span class="badge badge-success">DEPLOYED</span>';
+                    buoyStatusEl.innerHTML = '<span class="badge badge-warning">DEPLOYING</span>';
                 } else if (buoyStatusCode === 3) {
-                    buoyStatusEl.innerHTML = '<span class="badge badge-warning">OVERRIDE MODE</span>';
+                    buoyStatusEl.innerHTML = '<span class="badge badge-success">DEPLOYED</span>';
+                } else if (buoyStatusCode === 4) {
+                    buoyStatusEl.innerHTML = '<span class="badge badge-warning">OVERRIDE</span>';
                 } else {
                     buoyStatusEl.innerHTML = '<span class="badge badge-neutral">UNKNOWN</span>';
                 }
