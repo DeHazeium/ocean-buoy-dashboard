@@ -168,7 +168,6 @@
 </head>
 <body>
     <div class="loading" id="loading"><div class="spinner"></div></div>
-    <div id="statusBanner"></div>
     <div class="modal" id="maintenanceModal">
         <div class="modal-content">
             <div class="modal-title">Send Maintenance Command</div>
@@ -181,12 +180,23 @@
     </div>
     <div class="notifications" id="notifications"></div>
     <div class="controls">
-        <div class="control-btn maintenance-btn" id="maintenanceBtn" title="Send Maintenance" style="display: none;"><span>🔧</span><span>MAINTENANCE</span></div>
+        <div class="control-btn maintenance-btn" id="maintenanceBtn" title="Send Maintenance" style="display: none;"><span>🔧</span><span>CLEAR</span></div>
         <div class="control-btn" id="soundBtn" title="Toggle Sound">🔇</div>
         <div class="control-btn" id="exportBtn" title="Export Data">⬇</div>
         <div class="control-btn" id="fullscreenBtn" title="Fullscreen">⛶</div>
     </div>
     <div class="container" id="mainContainer">
+        <!-- Alert Widget (replaces banner) -->
+        <div id="alertWidget"></div>
+
+        <!-- Buoy Status Display -->
+        <div class="buoy-status-display">
+            <div class="buoy-status-icon">💙</div>
+            <div class="buoy-status-text">
+                <div class="buoy-status-label">Current Buoy Status</div>
+                <div class="buoy-status-value" id="buoyStatusText">Waiting for data...</div>
+            </div>
+        </div>
         <header class="header">
             <div class="header-top">
                 <div class="header-title">
@@ -238,9 +248,20 @@
     <script>
         const CHANNEL_ID = "3203006", READ_API_KEY = "JN2TR7S7XJLS9TWW", WRITE_API_KEY = "YL2NG29Y3OFC2O9B", REFRESH_MS = 20000;
         let chart, prevData = {}, timeline = [], soundOn = false, firstLoad = true, magnitudeHistory = [];
-        let currentDeployed = null, currentOverride = null, currentEventType = null;
+        let currentBuoyStatus = "Waiting for data...";
         
         const EVENT_TYPES = { 0: 'OFFLINE', 1: 'STATUS', 2: 'DRIFT', 3: 'IMPACT' };
+        const STATUS_MESSAGES = {
+            'STARTUP': 'Starting up...',
+            'CALIBRATING': 'Calibrating sensors...',
+            'GPS_LOCKING': 'Acquiring GPS lock...',
+            'GPS_LOCKED': 'GPS locked successfully',
+            'DEPLOYED': 'Deployed and monitoring',
+            'MONITORING': 'Active monitoring',
+            'OVERRIDE': 'Override mode active',
+            'UNDEPLOYED': 'Undeployed - Standby',
+            'GPS_RETRY': 'Retrying GPS connection...'
+        };
         
         chart = new Chart(document.getElementById('chart'), {
             type: 'line',
@@ -306,74 +327,66 @@
             }
         }
         
-        function updateBanner(online, deployed, override, eventType) {
-            const banner = document.getElementById('statusBanner');
-            const container = document.getElementById('mainContainer');
+        function updateAlertWidget(online, deployed, override, eventType) {
+            const widget = document.getElementById('alertWidget');
             let html = '';
             
             // Priority order: Override > Not Deployed > Event Alerts > Offline
             if (override === '1') {
-                html = `<div class="status-banner banner-override">
-                    <div class="banner-content">
-                        <div class="banner-icon">🔧</div>
-                        <div class="banner-text">
-                            <div class="banner-title">Override Mode Active</div>
-                            <div class="banner-subtitle">Manual control enabled - System thresholds bypassed</div>
+                html = `<div class="alert-widget alert-override">
+                    <div class="alert-content">
+                        <div class="alert-icon">🔧</div>
+                        <div class="alert-text">
+                            <div class="alert-title">Override Mode Active</div>
+                            <div class="alert-subtitle">Manual control enabled - System thresholds bypassed</div>
                         </div>
                     </div>
                 </div>`;
-                container.classList.add('has-banner');
             } else if (deployed === '0') {
-                html = `<div class="status-banner banner-not-deployed">
-                    <div class="banner-content">
-                        <div class="banner-icon">⚠️</div>
-                        <div class="banner-text">
-                            <div class="banner-title">System Not Deployed</div>
-                            <div class="banner-subtitle">Buoy is in free/test mode - Deploy to activate monitoring</div>
+                html = `<div class="alert-widget alert-not-deployed">
+                    <div class="alert-content">
+                        <div class="alert-icon">⚠️</div>
+                        <div class="alert-text">
+                            <div class="alert-title">System Not Deployed</div>
+                            <div class="alert-subtitle">Buoy is in free/test mode - Deploy to activate monitoring</div>
                         </div>
                     </div>
                 </div>`;
-                container.classList.add('has-banner');
             } else if (eventType === 'IMPACT') {
-                html = `<div class="status-banner banner-impact">
-                    <div class="banner-content">
-                        <div class="banner-icon">💥</div>
-                        <div class="banner-text">
-                            <div class="banner-title">Impact Alert Active</div>
-                            <div class="banner-subtitle">High energy detection - Immediate attention required</div>
+                html = `<div class="alert-widget alert-impact">
+                    <div class="alert-content">
+                        <div class="alert-icon">💥</div>
+                        <div class="alert-text">
+                            <div class="alert-title">Impact Alert Active</div>
+                            <div class="alert-subtitle">High energy detection - Immediate attention required</div>
                         </div>
                     </div>
-                    <button class="banner-action" onclick="document.getElementById('maintenanceBtn').click()">Clear Alert</button>
+                    <button class="alert-action" onclick="document.getElementById('maintenanceBtn').click()">Clear Alert</button>
                 </div>`;
-                container.classList.add('has-banner');
             } else if (eventType === 'DRIFT') {
-                html = `<div class="status-banner banner-drift">
-                    <div class="banner-content">
-                        <div class="banner-icon">🌊</div>
-                        <div class="banner-text">
-                            <div class="banner-title">Drift Alert Active</div>
-                            <div class="banner-subtitle">Position drift detected - Monitor closely</div>
+                html = `<div class="alert-widget alert-drift">
+                    <div class="alert-content">
+                        <div class="alert-icon">🌊</div>
+                        <div class="alert-text">
+                            <div class="alert-title">Drift Alert Active</div>
+                            <div class="alert-subtitle">Position drift detected - Monitor closely</div>
                         </div>
                     </div>
-                    <button class="banner-action" onclick="document.getElementById('maintenanceBtn').click()">Clear Alert</button>
+                    <button class="alert-action" onclick="document.getElementById('maintenanceBtn').click()">Clear Alert</button>
                 </div>`;
-                container.classList.add('has-banner');
             } else if (online === '0') {
-                html = `<div class="status-banner banner-impact">
-                    <div class="banner-content">
-                        <div class="banner-icon">📡</div>
-                        <div class="banner-text">
-                            <div class="banner-title">Buoy Offline</div>
-                            <div class="banner-subtitle">No signal received - Connection lost</div>
+                html = `<div class="alert-widget alert-offline">
+                    <div class="alert-content">
+                        <div class="alert-icon">📡</div>
+                        <div class="alert-text">
+                            <div class="alert-title">Buoy Offline</div>
+                            <div class="alert-subtitle">No signal received - Connection lost</div>
                         </div>
                     </div>
                 </div>`;
-                container.classList.add('has-banner');
-            } else {
-                container.classList.remove('has-banner');
             }
             
-            banner.innerHTML = html;
+            widget.innerHTML = html;
             
             const maintenanceBtn = document.getElementById('maintenanceBtn');
             if (eventType === 'IMPACT' || eventType === 'DRIFT') {
@@ -546,7 +559,22 @@
                     statusText.textContent = 'CONNECTED';
                 }
                 
-                updateBanner(parsed.online, parsed.deployed, parsed.override, parsed.eventType);
+                updateAlertWidget(parsed.online, parsed.deployed, parsed.override, parsed.eventType);
+                // Update Buoy Status Display
+                const buoyStatusEl = document.getElementById('buoyStatusText');
+                if (parsed.online === '0') {
+                    buoyStatusEl.textContent = 'Offline - No signal';
+                } else if (parsed.eventType === 'STATUS') {
+                    // Try to extract readable status message
+                    buoyStatusEl.textContent = currentBuoyStatus;
+                } else if (parsed.eventType === 'IMPACT') {
+                    buoyStatusEl.textContent = '⚠️ IMPACT DETECTED!';
+                } else if (parsed.eventType === 'DRIFT') {
+                    buoyStatusEl.textContent = '⚠️ DRIFT DETECTED!';
+                } else {
+                    buoyStatusEl.textContent = 'Active - Monitoring';
+                }
+                
                 checkChanges(parsed);
                 
                 if (parsed.magnitude !== '--') {
