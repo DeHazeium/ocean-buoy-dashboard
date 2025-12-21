@@ -97,6 +97,59 @@
         
         .status-row { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
         
+        .countdown-widget {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.813rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        .countdown-label {
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.75rem;
+        }
+        
+        .countdown-timer {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            min-width: 42px;
+            text-align: center;
+        }
+        
+        .countdown-progress {
+            width: 40px;
+            height: 40px;
+            position: relative;
+        }
+        
+        .countdown-circle {
+            transform: rotate(-90deg);
+        }
+        
+        .countdown-circle-bg {
+            fill: none;
+            stroke: var(--border);
+            stroke-width: 3;
+        }
+        
+        .countdown-circle-progress {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 3;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.3s linear;
+        }
+        
         .status-indicator {
             display: flex; align-items: center; gap: 10px; font-size: 0.813rem;
             font-family: 'JetBrains Mono', monospace; font-weight: 600; letter-spacing: 0.5px;
@@ -545,6 +598,19 @@
             <p class="subtitle">LoRa Marine Monitoring Node • Real-Time Telemetry Dashboard</p>
             <div class="status-row">
                 <div class="status-indicator"><div class="dot"></div><span>LIVE</span></div>
+                <div class="countdown-widget">
+                    <div class="countdown-progress">
+                        <svg width="40" height="40" class="countdown-circle">
+                            <circle class="countdown-circle-bg" cx="20" cy="20" r="16"></circle>
+                            <circle class="countdown-circle-progress" id="countdownCircle" cx="20" cy="20" r="16" 
+                                    stroke-dasharray="100.53" stroke-dashoffset="0"></circle>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="countdown-label">Next Update</div>
+                        <div class="countdown-timer" id="countdownTimer">15s</div>
+                    </div>
+                </div>
                 <div class="time" id="currentTime">--:--:--</div>
             </div>
         </header>
@@ -619,6 +685,8 @@
         let impactAlertActive = false; // Track if critical alert is showing
         let lastImpactEventCount = -1; // Track last impact event count
         let lastDriftEventCount = -1; // Track last drift event count
+        let countdownSeconds = 15; // Countdown from 15 seconds
+        let lastFetchTime = Date.now(); // Track when last fetch happened
         
         const ctx = document.getElementById('magnitudeChart').getContext('2d');
         const magnitudeData = [], maxDataPoints = 20;
@@ -665,8 +733,39 @@
             impactAlertActive = false;
         }
         
+        function updateCountdown() {
+            const elapsed = Date.now() - lastFetchTime;
+            const remaining = Math.max(0, Math.ceil((REFRESH_INTERVAL - elapsed) / 1000));
+            
+            countdownSeconds = remaining;
+            
+            // Update timer text
+            document.getElementById('countdownTimer').textContent = remaining + 's';
+            
+            // Update progress circle
+            const circumference = 100.53; // 2 * PI * radius (16)
+            const progress = (remaining / 15) * circumference;
+            document.getElementById('countdownCircle').style.strokeDashoffset = circumference - progress;
+            
+            // Change color based on time remaining
+            const circle = document.getElementById('countdownCircle');
+            if (remaining <= 3) {
+                circle.style.stroke = 'var(--danger)';
+            } else if (remaining <= 7) {
+                circle.style.stroke = 'var(--warning)';
+            } else {
+                circle.style.stroke = 'var(--accent)';
+            }
+        }
+        
+        // Update countdown every second
+        setInterval(updateCountdown, 1000);
+        
         async function fetchData() {
             try {
+                lastFetchTime = Date.now(); // Reset countdown timer
+                countdownSeconds = 15;
+                
                 const response = await fetch(API_URL);
                 const data = await response.json();
                 if (!data || !data.created_at) return;
