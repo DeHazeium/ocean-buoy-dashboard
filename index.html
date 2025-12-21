@@ -58,176 +58,6 @@
         
         .container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 1; }
         
-        /* Status History Timeline */
-        .timeline-panel {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 320px;
-            height: 100vh;
-            background: var(--surface);
-            border-right: 1px solid var(--border);
-            transform: translateX(-320px);
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1000;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .timeline-panel.open {
-            transform: translateX(0);
-        }
-        
-        .timeline-header {
-            padding: 24px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .timeline-title {
-            font-family: 'Inter', sans-serif;
-            font-size: 0.875rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-primary);
-        }
-        
-        .timeline-close {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            transition: all 0.2s ease;
-        }
-        
-        .timeline-close:hover {
-            background: var(--border);
-            color: var(--text-primary);
-        }
-        
-        .timeline-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px 24px;
-        }
-        
-        .timeline-content::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .timeline-content::-webkit-scrollbar-track {
-            background: var(--surface);
-        }
-        
-        .timeline-content::-webkit-scrollbar-thumb {
-            background: var(--border-bright);
-            border-radius: 3px;
-        }
-        
-        .timeline-item {
-            position: relative;
-            padding-left: 32px;
-            padding-bottom: 24px;
-            animation: slideInLeft 0.4s ease-out;
-        }
-        
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: 6px;
-            top: 6px;
-            bottom: -24px;
-            width: 2px;
-            background: var(--border);
-        }
-        
-        .timeline-item:last-child::before {
-            display: none;
-        }
-        
-        .timeline-dot {
-            position: absolute;
-            left: 0;
-            top: 4px;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            border: 2px solid;
-            background: var(--surface);
-            z-index: 1;
-        }
-        
-        .timeline-dot.impact { border-color: var(--danger); background: var(--danger); }
-        .timeline-dot.drift { border-color: var(--warning); background: var(--warning); }
-        .timeline-dot.status { border-color: var(--accent); background: var(--accent); }
-        .timeline-dot.success { border-color: var(--success); background: var(--success); }
-        
-        .timeline-time {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            font-family: 'IBM Plex Mono', monospace;
-            margin-bottom: 4px;
-        }
-        
-        .timeline-event {
-            font-size: 0.813rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-        
-        .timeline-details {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            line-height: 1.5;
-        }
-        
-        .timeline-toggle {
-            position: fixed;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-left: none;
-            border-radius: 0 8px 8px 0;
-            padding: 20px 10px;
-            cursor: pointer;
-            z-index: 999;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 700;
-            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .timeline-toggle:hover {
-            background: var(--surface-elevated);
-            padding-right: 14px;
-            color: var(--text-primary);
-            box-shadow: 3px 0 12px rgba(0, 0, 0, 0.2);
-        }
-        
-        @keyframes slideInLeft {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
         header {
             margin-bottom: 48px; padding-bottom: 32px; 
             border-bottom: 1px solid var(--border); 
@@ -347,19 +177,6 @@
             overflow: hidden;
             border-radius: 16px;
             animation: fadeInUp 0.6s ease-out backwards;
-            transform-style: preserve-3d;
-            perspective: 1000px;
-        }
-        
-        /* 3D Flip Animation */
-        .widget.flipping {
-            animation: flipCard 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        @keyframes flipCard {
-            0% { transform: rotateY(0deg); }
-            50% { transform: rotateY(90deg); opacity: 0.5; }
-            100% { transform: rotateY(0deg); }
         }
         
         @keyframes fadeInUp {
@@ -373,41 +190,6 @@
         .widget:nth-child(4) { animation-delay: 0.2s; }
         .widget:nth-child(5) { animation-delay: 0.25s; }
         .widget:nth-child(6) { animation-delay: 0.3s; }
-        
-        /* Progress Ring */
-        .progress-ring {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            width: 48px;
-            height: 48px;
-            transform: rotate(-90deg);
-        }
-        
-        .progress-ring-circle {
-            fill: none;
-            stroke: var(--border);
-            stroke-width: 3;
-        }
-        
-        .progress-ring-progress {
-            fill: none;
-            stroke: var(--accent);
-            stroke-width: 3;
-            stroke-linecap: round;
-            transition: stroke-dashoffset 0.3s ease;
-        }
-        
-        .progress-ring-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(90deg);
-            font-size: 0.625rem;
-            font-weight: 700;
-            font-family: 'IBM Plex Mono', monospace;
-            color: var(--text-secondary);
-        }
         
         .widget::before {
             content: ''; 
@@ -643,48 +425,35 @@
         
         /* Alert Mode Styling */
         .alert-mode .event-widget {
-            animation: alertBlinkContinuous 3s infinite;
+            animation: alertBlink 3.5s;
+            animation-fill-mode: forwards;
         }
         
-        @keyframes alertBlinkContinuous {
-            /* 1 second of blinking (5 blinks at 200ms each) */
-            0%, 6.67% { 
+        @keyframes alertBlink {
+            0%, 10% { 
                 background: var(--danger);
                 border-color: var(--danger);
             }
-            10%, 16.67% { 
+            15%, 25% { 
                 background: var(--surface);
                 border-color: var(--border);
             }
-            20%, 26.67% { 
+            30%, 40% { 
                 background: var(--danger);
                 border-color: var(--danger);
             }
-            30%, 36.67% { 
+            45%, 55% { 
                 background: var(--surface);
                 border-color: var(--border);
             }
-            40%, 46.67% { 
+            60%, 70% { 
                 background: var(--danger);
                 border-color: var(--danger);
             }
-            50%, 56.67% { 
+            75%, 85% { 
                 background: var(--surface);
                 border-color: var(--border);
             }
-            60%, 66.67% { 
-                background: var(--danger);
-                border-color: var(--danger);
-            }
-            70%, 76.67% { 
-                background: var(--surface);
-                border-color: var(--border);
-            }
-            80%, 86.67% { 
-                background: var(--danger);
-                border-color: var(--danger);
-            }
-            /* 2 seconds solid red (remaining 66.67% of cycle) */
             90%, 100% { 
                 background: var(--danger);
                 border-color: var(--danger);
@@ -692,48 +461,35 @@
         }
         
         .alert-mode.drift-alert .event-widget {
-            animation: alertBlinkContinuousOrange 3s infinite;
+            animation: alertBlinkOrange 3.5s;
+            animation-fill-mode: forwards;
         }
         
-        @keyframes alertBlinkContinuousOrange {
-            /* 1 second of blinking (5 blinks at 200ms each) */
-            0%, 6.67% { 
+        @keyframes alertBlinkOrange {
+            0%, 10% { 
                 background: var(--warning);
                 border-color: var(--warning);
             }
-            10%, 16.67% { 
+            15%, 25% { 
                 background: var(--surface);
                 border-color: var(--border);
             }
-            20%, 26.67% { 
+            30%, 40% { 
                 background: var(--warning);
                 border-color: var(--warning);
             }
-            30%, 36.67% { 
+            45%, 55% { 
                 background: var(--surface);
                 border-color: var(--border);
             }
-            40%, 46.67% { 
+            60%, 70% { 
                 background: var(--warning);
                 border-color: var(--warning);
             }
-            50%, 56.67% { 
+            75%, 85% { 
                 background: var(--surface);
                 border-color: var(--border);
             }
-            60%, 66.67% { 
-                background: var(--warning);
-                border-color: var(--warning);
-            }
-            70%, 76.67% { 
-                background: var(--surface);
-                border-color: var(--border);
-            }
-            80%, 86.67% { 
-                background: var(--warning);
-                border-color: var(--warning);
-            }
-            /* 2 seconds solid orange (remaining 66.67% of cycle) */
             90%, 100% { 
                 background: var(--warning);
                 border-color: var(--warning);
@@ -873,7 +629,7 @@
             border-color: var(--purple); 
             background: rgba(175, 82, 222, 0.12); 
             box-shadow: 0 0 20px var(--purple-glow); 
-            animation: pulse-glow-purple 2s infinite;
+            animation: pulse-glow 2s infinite;
         }
         .buoy-status-big.deployed { 
             color: var(--success); 
@@ -887,45 +643,23 @@
             border-color: var(--warning); 
             background: rgba(255, 149, 0, 0.15); 
             box-shadow: 0 0 20px var(--warning-glow); 
-            animation: pulse-glow-orange 1.5s infinite; 
+            animation: pulse-glow 1.5s infinite; 
         }
         .buoy-status-big.offline { 
             color: var(--danger); 
             border-color: var(--danger); 
             background: rgba(255, 59, 48, 0.15); 
             box-shadow: 0 0 20px var(--danger-glow); 
-            animation: pulse-glow-red 1s infinite; 
+            animation: pulse-glow 1s infinite; 
         }
         
-        @keyframes pulse-glow-purple { 
-            0%, 100% { 
-                box-shadow: 0 0 20px var(--purple-glow); 
-                transform: scale(1);
-            } 
-            50% { 
-                box-shadow: 0 0 30px var(--purple-glow), 0 0 45px var(--purple-glow);
-                transform: scale(1.02);
-            } 
-        }
-        
-        @keyframes pulse-glow-orange { 
+        @keyframes pulse-glow { 
             0%, 100% { 
                 box-shadow: 0 0 20px var(--warning-glow); 
                 transform: scale(1);
             } 
             50% { 
                 box-shadow: 0 0 30px var(--warning-glow), 0 0 45px var(--warning-glow);
-                transform: scale(1.02);
-            } 
-        }
-        
-        @keyframes pulse-glow-red { 
-            0%, 100% { 
-                box-shadow: 0 0 20px var(--danger-glow); 
-                transform: scale(1);
-            } 
-            50% { 
-                box-shadow: 0 0 30px var(--danger-glow), 0 0 45px var(--danger-glow);
                 transform: scale(1.02);
             } 
         }
@@ -1006,31 +740,13 @@
     </style>
 </head>
 <body>
-    <!-- Timeline Toggle Button -->
-    <button class="timeline-toggle" onclick="toggleTimeline()" id="timelineToggle">
-        ◀
-    </button>
-    
-    <!-- Status History Timeline Panel -->
-    <div class="timeline-panel" id="timelinePanel">
-        <div class="timeline-header">
-            <div class="timeline-title">Event History</div>
-            <button class="timeline-close" onclick="toggleTimeline()">×</button>
-        </div>
-        <div class="timeline-content" id="timelineContent">
-            <div style="text-align: center; color: var(--text-muted); padding: 40px 0;">
-                <div style="font-size: 0.813rem;">No events yet</div>
-            </div>
-        </div>
-    </div>
-    
     <div class="container">
         <header>
             <h1>Wave32 <span style="font-size: 0.5em; font-weight: 600; color: var(--warning); vertical-align: super; letter-spacing: 0.05em;">BETA</span></h1>
             <p class="subtitle">LoRa Marine Monitoring Node • Real-Time Telemetry Dashboard</p>
             <div class="status-row">
                 <div class="status-indicator"><div class="dot"></div><span>LIVE</span></div>
-                <div class="countdown-widget" id="countdownWidget">
+                <div class="countdown-widget">
                     <div class="countdown-progress">
                         <svg width="40" height="40" class="countdown-circle">
                             <circle class="countdown-circle-bg" cx="20" cy="20" r="16"></circle>
@@ -1058,42 +774,10 @@
         <br>
         
         <div class="grid">
-            <div class="widget" data-accent="impact">
-                <svg class="progress-ring" id="eventTypeRing">
-                    <circle class="progress-ring-circle" cx="24" cy="24" r="20"></circle>
-                    <circle class="progress-ring-progress" cx="24" cy="24" r="20"></circle>
-                </svg>
-                <div class="widget-title">Event Type</div>
-                <div class="stat-value" id="eventType">--</div>
-                <div class="stat-unit" id="eventSubtype">Waiting for data</div>
-            </div>
-            <div class="widget" data-accent="impact">
-                <svg class="progress-ring" id="magnitudeRing">
-                    <circle class="progress-ring-circle" cx="24" cy="24" r="20"></circle>
-                    <circle class="progress-ring-progress" cx="24" cy="24" r="20"></circle>
-                </svg>
-                <div class="widget-title">Magnitude</div>
-                <div class="stat-value" id="magnitude">--</div>
-                <div class="stat-unit">m/s² or meters</div>
-            </div>
-            <div class="widget" data-accent="signal">
-                <svg class="progress-ring" id="rssiRing">
-                    <circle class="progress-ring-circle" cx="24" cy="24" r="20"></circle>
-                    <circle class="progress-ring-progress" cx="24" cy="24" r="20"></circle>
-                </svg>
-                <div class="widget-title">Signal Strength</div>
-                <div class="stat-value" id="rssi">--</div>
-                <div class="stat-unit">dBm</div>
-            </div>
-            <div class="widget">
-                <svg class="progress-ring" id="eventCountRing">
-                    <circle class="progress-ring-circle" cx="24" cy="24" r="20"></circle>
-                    <circle class="progress-ring-progress" cx="24" cy="24" r="20"></circle>
-                </svg>
-                <div class="widget-title">Total Events</div>
-                <div class="stat-value" id="eventCount">0</div>
-                <div class="stat-unit">recorded</div>
-            </div>
+            <div class="widget" data-accent="impact"><div class="widget-title">Event Type</div><div class="stat-value" id="eventType">--</div><div class="stat-unit" id="eventSubtype">Waiting for data</div></div>
+            <div class="widget" data-accent="impact"><div class="widget-title">Magnitude</div><div class="stat-value" id="magnitude">--</div><div class="stat-unit">m/s² or meters</div></div>
+            <div class="widget" data-accent="signal"><div class="widget-title">Signal Strength</div><div class="stat-value" id="rssi">--</div><div class="stat-unit">dBm</div></div>
+            <div class="widget"><div class="widget-title">Total Events</div><div class="stat-value" id="eventCount">0</div><div class="stat-unit">recorded</div></div>
         </div>
         
         <div class="grid-2">
@@ -1140,7 +824,7 @@
     </div>
     
     <button class="maintenance-button" id="maintenanceButton" onclick="sendMaintenance()">
-        Send Maintenance
+        🔧 Send Maintenance
     </button>
 
     <script>
@@ -1157,113 +841,9 @@
         let lastFetchTime = Date.now(); // Track when last fetch happened
         let alertMode = false; // Track if system is in alert mode (impact/drift/offline)
         let alertModeType = ''; // Track type of alert (impact, drift, offline)
-        let eventHistory = []; // Store event history for timeline
-        const MAX_HISTORY = 50; // Maximum events to keep
-        
-        // Alert mode states - persistent until maintenance is sent
-        let alertModes = {
-            buoyOffline: false,
-            impact: false,
-            drift: false,
-            receiverOffline: false
-        };
-        let alertAnimationIntervals = {};
-        let lastImpactEventCount = null;
-        let lastDriftEventCount = null;
-        let receiverOnline = false;
         
         const ctx = document.getElementById('magnitudeChart').getContext('2d');
         const magnitudeData = [], maxDataPoints = 20;
-        
-        // Timeline Functions
-        function toggleTimeline() {
-            const panel = document.getElementById('timelinePanel');
-            const toggle = document.getElementById('timelineToggle');
-            panel.classList.toggle('open');
-            
-            // Update toggle button arrow direction
-            if (panel.classList.contains('open')) {
-                toggle.textContent = '▶';
-            } else {
-                toggle.textContent = '◀';
-            }
-        }
-        
-        function addToTimeline(eventType, message, details = '') {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('en-US', { 
-                hour12: false, 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit' 
-            });
-            
-            const event = {
-                time: timeString,
-                type: eventType,
-                message: message,
-                details: details,
-                timestamp: now.getTime()
-            };
-            
-            eventHistory.unshift(event); // Add to beginning
-            if (eventHistory.length > MAX_HISTORY) {
-                eventHistory.pop(); // Remove oldest
-            }
-            
-            updateTimelineDisplay();
-        }
-        
-        function updateTimelineDisplay() {
-            const content = document.getElementById('timelineContent');
-            
-            if (eventHistory.length === 0) {
-                content.innerHTML = `
-                    <div style="text-align: center; color: var(--text-muted); padding: 40px 0;">
-                        <div style="font-size: 0.813rem;">No events yet</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            content.innerHTML = eventHistory.map(event => `
-                <div class="timeline-item">
-                    <div class="timeline-dot ${event.type}"></div>
-                    <div class="timeline-time">${event.time}</div>
-                    <div class="timeline-event">${event.message}</div>
-                    ${event.details ? `<div class="timeline-details">${event.details}</div>` : ''}
-                </div>
-            `).join('');
-        }
-        
-        // 3D Flip Card Animation
-        function flipWidget(widgetElement) {
-            widgetElement.classList.add('flipping');
-            setTimeout(() => {
-                widgetElement.classList.remove('flipping');
-            }, 600);
-        }
-        
-        // Progress Ring Update
-        function updateProgressRing(elementId, percentage, color = 'var(--accent)') {
-            const ring = document.getElementById(elementId);
-            if (!ring) return;
-            
-            const circle = ring.querySelector('.progress-ring-progress');
-            const text = ring.querySelector('.progress-ring-text');
-            
-            if (circle) {
-                const circumference = 2 * Math.PI * 20; // radius = 20
-                const offset = circumference - (percentage / 100) * circumference;
-                circle.style.strokeDasharray = `${circumference} ${circumference}`;
-                circle.style.strokeDashoffset = offset;
-                circle.style.stroke = color;
-            }
-            
-            if (text) {
-                text.textContent = Math.round(percentage) + '%';
-            }
-        }
         
         const chart = new Chart(ctx, {
             type: 'line',
@@ -1284,113 +864,6 @@
             document.getElementById('alertTitle').textContent = title;
             document.getElementById('alertText').textContent = text;
             banner.className = 'alert-banner show alert-' + type;
-            
-            // Add to timeline
-            let timelineType = 'status';
-            if (title.includes('IMPACT')) timelineType = 'impact';
-            else if (title.includes('DRIFT')) timelineType = 'drift';
-            else if (title.includes('OFFLINE')) timelineType = 'impact';
-            else if (title.includes('ONLINE')) timelineType = 'status';
-            
-            addToTimeline(timelineType, title, text);
-            
-            setTimeout(() => banner.classList.remove('show'), 8000);
-        }
-        
-        // Start alert mode for a widget - persistent blinking animation
-        function startAlertMode(widgetId, alertType) {
-            // Set alert mode state
-            alertModes[alertType] = true;
-            
-            // Show maintenance button
-            document.getElementById('maintenanceButton').classList.add('show');
-            
-            const widget = document.getElementById(widgetId);
-            if (!widget) return;
-            
-            // Clear any existing animation for this widget
-            if (alertAnimationIntervals[widgetId]) {
-                clearInterval(alertAnimationIntervals[widgetId]);
-            }
-            
-            let blinkCount = 0;
-            const maxBlinks = 5; // Blink 5 times (200ms on, 200ms off = 2 seconds total)
-            
-            function animationCycle() {
-                blinkCount = 0;
-                
-                const blinkInterval = setInterval(() => {
-                    if (blinkCount < maxBlinks * 2) { // *2 because we count on and off separately
-                        if (blinkCount % 2 === 0) {
-                            // Blink ON - red background with black text
-                            widget.style.background = '#ff3b30';
-                            widget.style.color = '#000000';
-                            widget.querySelectorAll('.stat-value, .stat-label, .event-type-big, .event-description-big, .magnitude-big, .buoy-status-big').forEach(el => {
-                                el.style.color = '#000000';
-                            });
-                        } else {
-                            // Blink OFF - return to normal
-                            widget.style.background = '';
-                            widget.style.color = '';
-                            widget.querySelectorAll('.stat-value, .stat-label, .event-type-big, .event-description-big, .magnitude-big, .buoy-status-big').forEach(el => {
-                                el.style.color = '';
-                            });
-                        }
-                        blinkCount++;
-                    } else {
-                        // After blinking, hold red for 2 seconds
-                        clearInterval(blinkInterval);
-                        widget.style.background = '#ff3b30';
-                        widget.style.color = '#000000';
-                        widget.querySelectorAll('.stat-value, .stat-label, .event-type-big, .event-description-big, .magnitude-big, .buoy-status-big').forEach(el => {
-                            el.style.color = '#000000';
-                        });
-                        
-                        // Wait 2 seconds, then start next cycle if alert mode is still active
-                        setTimeout(() => {
-                            if (alertModes[alertType]) {
-                                animationCycle();
-                            }
-                        }, 2000);
-                    }
-                }, 200); // 200ms interval
-            }
-            
-            // Store the animation function reference
-            alertAnimationIntervals[widgetId] = animationCycle;
-            
-            // Start the first cycle
-            animationCycle();
-        }
-        
-        // Stop alert mode for a widget
-        function stopAlertMode(widgetId, alertType) {
-            alertModes[alertType] = false;
-            
-            const widget = document.getElementById(widgetId);
-            if (!widget) return;
-            
-            // Reset widget styling
-            widget.style.background = '';
-            widget.style.color = '';
-            widget.querySelectorAll('.stat-value, .stat-label, .event-type-big, .event-description-big, .magnitude-big, .buoy-status-big').forEach(el => {
-                el.style.color = '';
-            });
-            
-            // Clear animation
-            if (alertAnimationIntervals[widgetId]) {
-                delete alertAnimationIntervals[widgetId];
-            }
-            
-            // Hide maintenance button if no alert modes are active
-            const anyAlertActive = Object.values(alertModes).some(active => active);
-            if (!anyAlertActive) {
-                document.getElementById('maintenanceButton').classList.remove('show');
-            }
-        }
-            else if (title.includes('ONLINE')) timelineType = 'success';
-            
-            addToTimeline(timelineType, title, text);
             
             // Make impact, drift, offline, and receiver offline alerts persistent with dismiss button
             if ((type === 'impact' && (title.includes('IMPACT DETECTED') || title.includes('OFFLINE'))) || 
@@ -1436,12 +909,6 @@
             document.body.classList.remove('alert-mode', 'drift-alert');
             document.getElementById('maintenanceButton').classList.remove('show');
             
-            // Clear all alert modes
-            stopAlertMode('eventWidget', 'impact');
-            stopAlertMode('eventWidget', 'drift');
-            stopAlertMode('eventWidget', 'buoyOffline');
-            stopAlertMode('countdownWidget', 'receiverOffline');
-            
             // Also dismiss the alert banner
             dismissAlert();
             
@@ -1477,24 +944,6 @@
         // Update countdown every second
         setInterval(updateCountdown, 1000);
         
-        // Save event to localStorage
-        function saveEvent(event) {
-            try {
-                let events = JSON.parse(localStorage.getItem('buoyEvents') || '[]');
-                events.push(event);
-                
-                // Keep only the last 100 events
-                if (events.length > 100) {
-                    events = events.slice(-100);
-                }
-                
-                localStorage.setItem('buoyEvents', JSON.stringify(events));
-                console.log('Event saved:', event);
-            } catch (error) {
-                console.error('Error saving event:', error);
-            }
-        }
-        
         async function fetchData() {
             try {
                 lastFetchTime = Date.now(); // Reset countdown timer
@@ -1514,14 +963,12 @@
                     if (receiverOnline) {
                         receiverOnline = false;
                         showAlert('⚠️ RECEIVER OFFLINE', 'WiFi connection lost or receiver stopped', 'impact');
-                        startAlertMode('countdownWidget', 'receiverOffline');
                         document.querySelector('.dot').style.background = 'var(--danger)';
                     }
                 } else {
                     if (!receiverOnline) {
                         receiverOnline = true;
                         showAlert('✅ RECEIVER ONLINE', 'Connection restored', 'drift');
-                        stopAlertMode('countdownWidget', 'receiverOffline');
                         document.querySelector('.dot').style.background = 'var(--success)';
                     }
                     lastUpdateTime = now;
@@ -1562,36 +1009,14 @@
                         // Only show impact alert if it's a new impact event
                         if (eventCount !== lastImpactEventCount) {
                             showAlert('⚠️ IMPACT DETECTED', `Magnitude: ${magnitude.toFixed(2)} m/s²`, 'impact');
-                            startAlertMode('eventWidget', 'impact');
                             lastImpactEventCount = eventCount;
-                            
-                            // Save impact event to localStorage
-                            saveEvent({
-                                type: 'IMPACT',
-                                magnitude: magnitude,
-                                timestamp: new Date().toISOString(),
-                                eventCount: eventCount,
-                                latitude: latitude,
-                                longitude: longitude
-                            });
                         }
                     }
                     else if (eventTypeCode === 2) {
                         // Only show drift alert if it's a new drift event
                         if (eventCount !== lastDriftEventCount) {
                             showAlert('⚠️ DRIFT DETECTED', `Distance/Change: ${magnitude.toFixed(2)} m`, 'drift');
-                            startAlertMode('eventWidget', 'drift');
                             lastDriftEventCount = eventCount;
-                            
-                            // Save drift event to localStorage
-                            saveEvent({
-                                type: 'DRIFT',
-                                magnitude: magnitude,
-                                timestamp: new Date().toISOString(),
-                                eventCount: eventCount,
-                                latitude: latitude,
-                                longitude: longitude
-                            });
                         }
                     }
                     // Note: Heartbeat (eventTypeCode === 0) and Status (eventTypeCode === 3) don't show alerts
@@ -1600,46 +1025,16 @@
                 // Check for buoy going offline
                 if (previousData.buoyStatusCode !== undefined && previousData.buoyStatusCode !== 6 && buoyStatusCode === 6) {
                     showAlert('❌ BUOY OFFLINE', 'Transmitter signal lost', 'impact');
-                    startAlertMode('eventWidget', 'buoyOffline');
-                    
-                    // Save buoy offline event
-                    saveEvent({
-                        type: 'BUOY_OFFLINE',
-                        magnitude: 0,
-                        timestamp: new Date().toISOString(),
-                        eventCount: eventCount,
-                        latitude: latitude,
-                        longitude: longitude
-                    });
                 }
                 
                 // Check for buoy coming back online
                 if (previousData.buoyStatusCode !== undefined && previousData.buoyStatusCode === 6 && buoyStatusCode !== 6) {
                     showAlert('✅ BUOY ONLINE', 'Transmitter signal restored', 'drift');
-                    stopAlertMode('eventWidget', 'buoyOffline');
-                    
-                    // Save buoy online event
-                    saveEvent({
-                        type: 'BUOY_ONLINE',
-                        magnitude: 0,
-                        timestamp: new Date().toISOString(),
-                        eventCount: eventCount,
-                        latitude: latitude,
-                        longitude: longitude
-                    });
                 }
                 
                 const eventTypeEl = document.getElementById('eventType');
                 eventTypeEl.textContent = eventType; eventTypeEl.className = `stat-value ${eventColor}`;
                 document.getElementById('eventSubtype').textContent = eventSubtype;
-                
-                // Trigger 3D flip on stat widgets when values change
-                if (previousData.eventTypeCode !== undefined && eventTypeCode !== previousData.eventTypeCode) {
-                    const widgets = document.querySelectorAll('.grid .widget');
-                    widgets.forEach((widget, index) => {
-                        setTimeout(() => flipWidget(widget), index * 100);
-                    });
-                }
                 
                 const eventWidget = document.getElementById('eventWidget');
                 const eventTypeBig = document.getElementById('eventTypeBig');
@@ -1681,27 +1076,6 @@
                 document.getElementById('rssi').textContent = rssi;
                 document.getElementById('eventCount').textContent = eventCount;
                 
-                // Update Progress Rings
-                // RSSI: -120 to -30 dBm range (better signal = higher percentage)
-                const rssiPercentage = Math.max(0, Math.min(100, ((rssi + 120) / 90) * 100));
-                updateProgressRing('rssiRing', rssiPercentage, rssi > -70 ? 'var(--success)' : rssi > -90 ? 'var(--warning)' : 'var(--danger)');
-                
-                // Event Count: show as percentage of max (assume 100 events max)
-                const eventCountPercentage = Math.min(100, (eventCount / 100) * 100);
-                updateProgressRing('eventCountRing', eventCountPercentage, 'var(--accent)');
-                
-                // Magnitude: 0-10 m/s² range
-                const magnitudePercentage = Math.min(100, (magnitude / 10) * 100);
-                updateProgressRing('magnitudeRing', magnitudePercentage, magnitude > 5 ? 'var(--danger)' : magnitude > 2 ? 'var(--warning)' : 'var(--success)');
-                
-                // Event Type: visual indicator (33%, 66%, 100% based on severity)
-                let eventTypePercentage = 33;
-                if (eventTypeCode === 1) eventTypePercentage = 100; // Impact = full
-                else if (eventTypeCode === 2) eventTypePercentage = 66; // Drift = 2/3
-                else if (eventTypeCode === 3 || eventTypeCode === 0) eventTypePercentage = 33; // Status/Heartbeat = 1/3
-                updateProgressRing('eventTypeRing', eventTypePercentage, 
-                    eventTypeCode === 1 ? 'var(--danger)' : eventTypeCode === 2 ? 'var(--warning)' : 'var(--accent)');
-                
                 const buoyStatusEl = document.getElementById('buoyStatus');
                 if (buoyStatusCode === 1) buoyStatusEl.innerHTML = '<span class="badge badge-blue">STANDBY</span>';
                 else if (buoyStatusCode === 2) buoyStatusEl.innerHTML = '<span class="badge badge-purple">DEPLOYING</span>';
@@ -1741,7 +1115,6 @@
                 if (receiverOnline) {
                     receiverOnline = false;
                     showAlert('⚠️ CONNECTION ERROR', 'Failed to fetch data', 'impact');
-                    startAlertMode('countdownWidget', 'receiverOffline');
                     document.querySelector('.dot').style.background = 'var(--danger)';
                 }
             }
