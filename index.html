@@ -100,6 +100,7 @@
         .status-indicator {
             display: flex; align-items: center; gap: 10px; font-size: 0.813rem;
             font-family: 'JetBrains Mono', monospace; font-weight: 600; letter-spacing: 0.5px;
+            position: relative;
         }
         
         .dot {
@@ -289,6 +290,76 @@
             color: var(--text-secondary); 
             font-weight: 500; 
             line-height: 1.5;
+            margin-bottom: 12px;
+        }
+        
+        .dismiss-button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 12px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.813rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: none;
+        }
+        
+        .alert-drift .dismiss-button {
+            background: var(--warning);
+        }
+        
+        .alert-drift .dismiss-button:hover {
+            background: #ffad33;
+            box-shadow: 0 4px 12px rgba(255, 149, 0, 0.4);
+        }
+        
+        .dismiss-button:hover {
+            background: #ff6b5e;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4);
+        }
+        
+        .dismiss-button:active {
+            transform: translateY(0);
+        }
+        
+        /* Update animation indicator */
+        .status-indicator::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--success);
+            border-radius: 50%;
+            opacity: 0;
+            animation: none;
+        }
+        
+        .status-indicator.updating::after {
+            animation: updatePulse 1s ease-out;
+        }
+        
+        @keyframes updatePulse {
+            0% { 
+                width: 8px; 
+                height: 8px; 
+                opacity: 1; 
+            }
+            100% { 
+                width: 32px; 
+                height: 32px; 
+                opacity: 0; 
+            }
         }
         
         .text-success { color: var(--success); text-shadow: 0 0 12px var(--success-glow); }
@@ -535,6 +606,7 @@
     <div class="alert-banner" id="alertBanner">
         <div class="alert-banner-title" id="alertTitle"></div>
         <div class="alert-banner-text" id="alertText"></div>
+        <button class="dismiss-button" id="dismissButton" onclick="dismissAlert()">Acknowledge</button>
     </div>
 
     <script>
@@ -544,6 +616,9 @@
         
         let lastUpdateTime = Date.now();
         let receiverOnline = true;
+        let impactAlertActive = false; // Track if critical alert is showing
+        let lastImpactEventCount = -1; // Track last impact event count
+        let lastDriftEventCount = -1; // Track last drift event count
         
         const ctx = document.getElementById('magnitudeChart').getContext('2d');
         const magnitudeData = [], maxDataPoints = 20;
@@ -567,7 +642,27 @@
             document.getElementById('alertTitle').textContent = title;
             document.getElementById('alertText').textContent = text;
             banner.className = 'alert-banner show alert-' + type;
-            setTimeout(() => banner.classList.remove('show'), 5000);
+            
+            // Make impact, drift, and offline alerts persistent with dismiss button
+            if ((type === 'impact' && (title.includes('IMPACT DETECTED') || title.includes('OFFLINE'))) || 
+                (type === 'drift' && title.includes('DRIFT DETECTED'))) {
+                impactAlertActive = true;
+                document.getElementById('dismissButton').style.display = 'block';
+                // Don't auto-hide critical alerts
+            } else {
+                document.getElementById('dismissButton').style.display = 'none';
+                setTimeout(() => {
+                    if (!impactAlertActive) { // Only hide if not an active critical alert
+                        banner.classList.remove('show');
+                    }
+                }, 5000);
+            }
+        }
+        
+        function dismissAlert() {
+            const banner = document.getElementById('alertBanner');
+            banner.classList.remove('show');
+            impactAlertActive = false;
         }
         
         async function fetchData() {
@@ -595,6 +690,11 @@
                         document.querySelector('.dot').style.background = 'var(--success)';
                     }
                     lastUpdateTime = now;
+                    
+                    // Trigger update animation
+                    const statusIndicator = document.querySelector('.status-indicator');
+                    statusIndicator.classList.add('updating');
+                    setTimeout(() => statusIndicator.classList.remove('updating'), 1000);
                 }
                 
                 const eventTypeCode = parseInt(data.field1) || 3;
@@ -623,8 +723,20 @@
                 else if (eventTypeCode === 3) { eventType = 'STATUS'; eventSubtype = 'System status update'; eventColor = 'text-accent'; }
                 
                 if (previousData.eventCount !== undefined && eventCount > previousData.eventCount) {
-                    if (eventTypeCode === 1) showAlert('⚠️ IMPACT DETECTED', `Magnitude: ${magnitude.toFixed(2)} m/s²`, 'impact');
-                    else if (eventTypeCode === 2) showAlert('⚠️ DRIFT DETECTED', `Distance/Change: ${magnitude.toFixed(2)} m`, 'drift');
+                    if (eventTypeCode === 1) {
+                        // Only show impact alert if it's a new impact event
+                        if (eventCount !== lastImpactEventCount) {
+                            showAlert('⚠️ IMPACT DETECTED', `Magnitude: ${magnitude.toFixed(2)} m/s²`, 'impact');
+                            lastImpactEventCount = eventCount;
+                        }
+                    }
+                    else if (eventTypeCode === 2) {
+                        // Only show drift alert if it's a new drift event
+                        if (eventCount !== lastDriftEventCount) {
+                            showAlert('⚠️ DRIFT DETECTED', `Distance/Change: ${magnitude.toFixed(2)} m`, 'drift');
+                            lastDriftEventCount = eventCount;
+                        }
+                    }
                     // Note: Heartbeat (eventTypeCode === 0) and Status (eventTypeCode === 3) don't show alerts
                 }
                 
