@@ -1030,7 +1030,7 @@
             <p class="subtitle">LoRa Marine Monitoring Node • Real-Time Telemetry Dashboard</p>
             <div class="status-row">
                 <div class="status-indicator"><div class="dot"></div><span>LIVE</span></div>
-                <div class="countdown-widget">
+                <div class="countdown-widget" id="countdownWidget">
                     <div class="countdown-progress">
                         <svg width="40" height="40" class="countdown-circle">
                             <circle class="countdown-circle-bg" cx="20" cy="20" r="16"></circle>
@@ -1160,6 +1160,18 @@
         let eventHistory = []; // Store event history for timeline
         const MAX_HISTORY = 50; // Maximum events to keep
         
+        // Alert mode states - persistent until maintenance is sent
+        let alertModes = {
+            buoyOffline: false,
+            impact: false,
+            drift: false,
+            receiverOffline: false
+        };
+        let alertAnimationIntervals = {};
+        let lastImpactEventCount = null;
+        let lastDriftEventCount = null;
+        let receiverOnline = false;
+        
         const ctx = document.getElementById('magnitudeChart').getContext('2d');
         const magnitudeData = [], maxDataPoints = 20;
         
@@ -1278,6 +1290,104 @@
             if (title.includes('IMPACT')) timelineType = 'impact';
             else if (title.includes('DRIFT')) timelineType = 'drift';
             else if (title.includes('OFFLINE')) timelineType = 'impact';
+            else if (title.includes('ONLINE')) timelineType = 'status';
+            
+            addToTimeline(timelineType, title, text);
+            
+            setTimeout(() => banner.classList.remove('show'), 8000);
+        }
+        
+        // Start alert mode for a widget - persistent blinking animation
+        function startAlertMode(widgetId, alertType) {
+            // Set alert mode state
+            alertModes[alertType] = true;
+            
+            // Show maintenance button
+            document.getElementById('maintenanceButton').classList.add('show');
+            
+            const widget = document.getElementById(widgetId);
+            if (!widget) return;
+            
+            // Clear any existing animation for this widget
+            if (alertAnimationIntervals[widgetId]) {
+                clearInterval(alertAnimationIntervals[widgetId]);
+            }
+            
+            let blinkCount = 0;
+            const maxBlinks = 5; // Blink 5 times (200ms on, 200ms off = 2 seconds total)
+            
+            function animationCycle() {
+                blinkCount = 0;
+                
+                const blinkInterval = setInterval(() => {
+                    if (blinkCount < maxBlinks * 2) { // *2 because we count on and off separately
+                        if (blinkCount % 2 === 0) {
+                            // Blink ON - red background with black text
+                            widget.style.background = '#ff3b30';
+                            widget.style.color = '#000000';
+                            widget.querySelectorAll('.stat-value, .stat-label, .event-type-big, .event-description-big, .magnitude-big, .buoy-status-big').forEach(el => {
+                                el.style.color = '#000000';
+                            });
+                        } else {
+                            // Blink OFF - return to normal
+                            widget.style.background = '';
+                            widget.style.color = '';
+                            widget.querySelectorAll('.stat-value, .stat-label, .event-type-big, .event-description-big, .magnitude-big, .buoy-status-big').forEach(el => {
+                                el.style.color = '';
+                            });
+                        }
+                        blinkCount++;
+                    } else {
+                        // After blinking, hold red for 2 seconds
+                        clearInterval(blinkInterval);
+                        widget.style.background = '#ff3b30';
+                        widget.style.color = '#000000';
+                        widget.querySelectorAll('.stat-value, .stat-label, .event-type-big, .event-description-big, .magnitude-big, .buoy-status-big').forEach(el => {
+                            el.style.color = '#000000';
+                        });
+                        
+                        // Wait 2 seconds, then start next cycle if alert mode is still active
+                        setTimeout(() => {
+                            if (alertModes[alertType]) {
+                                animationCycle();
+                            }
+                        }, 2000);
+                    }
+                }, 200); // 200ms interval
+            }
+            
+            // Store the animation function reference
+            alertAnimationIntervals[widgetId] = animationCycle;
+            
+            // Start the first cycle
+            animationCycle();
+        }
+        
+        // Stop alert mode for a widget
+        function stopAlertMode(widgetId, alertType) {
+            alertModes[alertType] = false;
+            
+            const widget = document.getElementById(widgetId);
+            if (!widget) return;
+            
+            // Reset widget styling
+            widget.style.background = '';
+            widget.style.color = '';
+            widget.querySelectorAll('.stat-value, .stat-label, .event-type-big, .event-description-big, .magnitude-big, .buoy-status-big').forEach(el => {
+                el.style.color = '';
+            });
+            
+            // Clear animation
+            if (alertAnimationIntervals[widgetId]) {
+                delete alertAnimationIntervals[widgetId];
+            }
+            
+            // Hide maintenance button if no alert modes are active
+            const anyAlertActive = Object.values(alertModes).some(active => active);
+            if (!anyAlertActive) {
+                document.getElementById('maintenanceButton').classList.remove('show');
+            }
+        }
             else if (title.includes('ONLINE')) timelineType = 'success';
             
             addToTimeline(timelineType, title, text);
@@ -1326,6 +1436,12 @@
             document.body.classList.remove('alert-mode', 'drift-alert');
             document.getElementById('maintenanceButton').classList.remove('show');
             
+            // Clear all alert modes
+            stopAlertMode('eventWidget', 'impact');
+            stopAlertMode('eventWidget', 'drift');
+            stopAlertMode('eventWidget', 'buoyOffline');
+            stopAlertMode('countdownWidget', 'receiverOffline');
+            
             // Also dismiss the alert banner
             dismissAlert();
             
@@ -1361,6 +1477,24 @@
         // Update countdown every second
         setInterval(updateCountdown, 1000);
         
+        // Save event to localStorage
+        function saveEvent(event) {
+            try {
+                let events = JSON.parse(localStorage.getItem('buoyEvents') || '[]');
+                events.push(event);
+                
+                // Keep only the last 100 events
+                if (events.length > 100) {
+                    events = events.slice(-100);
+                }
+                
+                localStorage.setItem('buoyEvents', JSON.stringify(events));
+                console.log('Event saved:', event);
+            } catch (error) {
+                console.error('Error saving event:', error);
+            }
+        }
+        
         async function fetchData() {
             try {
                 lastFetchTime = Date.now(); // Reset countdown timer
@@ -1380,12 +1514,14 @@
                     if (receiverOnline) {
                         receiverOnline = false;
                         showAlert('⚠️ RECEIVER OFFLINE', 'WiFi connection lost or receiver stopped', 'impact');
+                        startAlertMode('countdownWidget', 'receiverOffline');
                         document.querySelector('.dot').style.background = 'var(--danger)';
                     }
                 } else {
                     if (!receiverOnline) {
                         receiverOnline = true;
                         showAlert('✅ RECEIVER ONLINE', 'Connection restored', 'drift');
+                        stopAlertMode('countdownWidget', 'receiverOffline');
                         document.querySelector('.dot').style.background = 'var(--success)';
                     }
                     lastUpdateTime = now;
@@ -1426,14 +1562,36 @@
                         // Only show impact alert if it's a new impact event
                         if (eventCount !== lastImpactEventCount) {
                             showAlert('⚠️ IMPACT DETECTED', `Magnitude: ${magnitude.toFixed(2)} m/s²`, 'impact');
+                            startAlertMode('eventWidget', 'impact');
                             lastImpactEventCount = eventCount;
+                            
+                            // Save impact event to localStorage
+                            saveEvent({
+                                type: 'IMPACT',
+                                magnitude: magnitude,
+                                timestamp: new Date().toISOString(),
+                                eventCount: eventCount,
+                                latitude: latitude,
+                                longitude: longitude
+                            });
                         }
                     }
                     else if (eventTypeCode === 2) {
                         // Only show drift alert if it's a new drift event
                         if (eventCount !== lastDriftEventCount) {
                             showAlert('⚠️ DRIFT DETECTED', `Distance/Change: ${magnitude.toFixed(2)} m`, 'drift');
+                            startAlertMode('eventWidget', 'drift');
                             lastDriftEventCount = eventCount;
+                            
+                            // Save drift event to localStorage
+                            saveEvent({
+                                type: 'DRIFT',
+                                magnitude: magnitude,
+                                timestamp: new Date().toISOString(),
+                                eventCount: eventCount,
+                                latitude: latitude,
+                                longitude: longitude
+                            });
                         }
                     }
                     // Note: Heartbeat (eventTypeCode === 0) and Status (eventTypeCode === 3) don't show alerts
@@ -1442,11 +1600,33 @@
                 // Check for buoy going offline
                 if (previousData.buoyStatusCode !== undefined && previousData.buoyStatusCode !== 6 && buoyStatusCode === 6) {
                     showAlert('❌ BUOY OFFLINE', 'Transmitter signal lost', 'impact');
+                    startAlertMode('eventWidget', 'buoyOffline');
+                    
+                    // Save buoy offline event
+                    saveEvent({
+                        type: 'BUOY_OFFLINE',
+                        magnitude: 0,
+                        timestamp: new Date().toISOString(),
+                        eventCount: eventCount,
+                        latitude: latitude,
+                        longitude: longitude
+                    });
                 }
                 
                 // Check for buoy coming back online
                 if (previousData.buoyStatusCode !== undefined && previousData.buoyStatusCode === 6 && buoyStatusCode !== 6) {
                     showAlert('✅ BUOY ONLINE', 'Transmitter signal restored', 'drift');
+                    stopAlertMode('eventWidget', 'buoyOffline');
+                    
+                    // Save buoy online event
+                    saveEvent({
+                        type: 'BUOY_ONLINE',
+                        magnitude: 0,
+                        timestamp: new Date().toISOString(),
+                        eventCount: eventCount,
+                        latitude: latitude,
+                        longitude: longitude
+                    });
                 }
                 
                 const eventTypeEl = document.getElementById('eventType');
@@ -1561,6 +1741,7 @@
                 if (receiverOnline) {
                     receiverOnline = false;
                     showAlert('⚠️ CONNECTION ERROR', 'Failed to fetch data', 'impact');
+                    startAlertMode('countdownWidget', 'receiverOffline');
                     document.querySelector('.dot').style.background = 'var(--danger)';
                 }
             }
