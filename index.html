@@ -236,6 +236,7 @@
             position: relative; 
             z-index: 1;
             color: var(--text-primary);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .stat-unit { font-size: 0.875rem; color: var(--text-secondary); margin-top: 8px; font-weight: 500; }
@@ -249,8 +250,8 @@
         
         .data-item:last-child { border-bottom: none; padding-bottom: 0; }
         
-        .data-label { font-size: 0.813rem; color: var(--text-secondary); font-weight: 500; }
-        .data-value { font-family: 'IBM Plex Mono', monospace; font-size: 0.938rem; font-weight: 600; }
+        .data-label { font-size: 0.813rem; color: var(--text-secondary); font-weight: 500; transition: color 0.3s ease; }
+        .data-value { font-family: 'IBM Plex Mono', monospace; font-size: 0.938rem; font-weight: 600; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         
         .badge {
             display: inline-block; 
@@ -262,6 +263,7 @@
             border: 1.5px solid; 
             letter-spacing: 0.03em;
             border-radius: 6px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .badge-success { 
@@ -288,6 +290,12 @@
             border-color: var(--purple); 
             background: rgba(175, 82, 222, 0.12); 
             box-shadow: 0 0 12px var(--purple-glow); 
+        }
+        .badge-blue { 
+            color: var(--accent); 
+            border-color: var(--accent); 
+            background: rgba(0, 122, 255, 0.12); 
+            box-shadow: 0 0 12px var(--accent-glow); 
         }
         .badge-neutral { 
             color: var(--text-secondary); 
@@ -415,6 +423,133 @@
             }
         }
         
+        /* Alert Mode Styling */
+        .alert-mode .event-widget {
+            animation: alertBlink 3.5s;
+            animation-fill-mode: forwards;
+        }
+        
+        @keyframes alertBlink {
+            0%, 10% { 
+                background: var(--danger);
+                border-color: var(--danger);
+            }
+            15%, 25% { 
+                background: var(--surface);
+                border-color: var(--border);
+            }
+            30%, 40% { 
+                background: var(--danger);
+                border-color: var(--danger);
+            }
+            45%, 55% { 
+                background: var(--surface);
+                border-color: var(--border);
+            }
+            60%, 70% { 
+                background: var(--danger);
+                border-color: var(--danger);
+            }
+            75%, 85% { 
+                background: var(--surface);
+                border-color: var(--border);
+            }
+            90%, 100% { 
+                background: var(--danger);
+                border-color: var(--danger);
+            }
+        }
+        
+        .alert-mode.drift-alert .event-widget {
+            animation: alertBlinkOrange 3.5s;
+            animation-fill-mode: forwards;
+        }
+        
+        @keyframes alertBlinkOrange {
+            0%, 10% { 
+                background: var(--warning);
+                border-color: var(--warning);
+            }
+            15%, 25% { 
+                background: var(--surface);
+                border-color: var(--border);
+            }
+            30%, 40% { 
+                background: var(--warning);
+                border-color: var(--warning);
+            }
+            45%, 55% { 
+                background: var(--surface);
+                border-color: var(--border);
+            }
+            60%, 70% { 
+                background: var(--warning);
+                border-color: var(--warning);
+            }
+            75%, 85% { 
+                background: var(--surface);
+                border-color: var(--border);
+            }
+            90%, 100% { 
+                background: var(--warning);
+                border-color: var(--warning);
+            }
+        }
+        
+        .alert-mode .event-widget .event-type-big,
+        .alert-mode .event-widget .event-description,
+        .alert-mode .event-widget .event-magnitude-display,
+        .alert-mode .event-widget .event-label {
+            color: #000000 !important;
+        }
+        
+        .alert-mode .event-widget .buoy-status-big {
+            background: rgba(0, 0, 0, 0.2) !important;
+            color: #000000 !important;
+            border-color: #000000 !important;
+        }
+        
+        .maintenance-button {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            padding: 16px 32px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.938rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: none;
+            z-index: 1001;
+            box-shadow: 0 8px 24px rgba(255, 59, 48, 0.4);
+        }
+        
+        .maintenance-button:hover {
+            background: #ff6b5e;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(255, 59, 48, 0.5);
+        }
+        
+        .maintenance-button:active {
+            transform: translateY(0);
+        }
+        
+        .maintenance-button.show {
+            display: block;
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(120px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
         .text-success { color: var(--success); text-shadow: 0 0 12px var(--success-glow); }
         .text-warning { color: var(--warning); text-shadow: 0 0 12px var(--warning-glow); }
         .text-danger { color: var(--danger); text-shadow: 0 0 12px var(--danger-glow); }
@@ -428,7 +563,7 @@
             text-align: center; 
             position: relative; 
             overflow: hidden; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             border-radius: 16px;
             animation: slideDown 0.6s ease-out;
         }
@@ -446,7 +581,7 @@
             right: 0; 
             height: 3px;
             background: var(--text-muted); 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .event-widget.event-impact::before { 
@@ -478,28 +613,30 @@
             padding: 10px 24px; 
             display: inline-block;
             border: 2px solid; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
             border-radius: 8px;
         }
         
         .buoy-status-big.standby { 
+            color: var(--accent); 
+            border-color: var(--accent); 
+            background: rgba(0, 122, 255, 0.12); 
+            box-shadow: 0 0 20px var(--accent-glow);
+            animation: statusFadeIn 0.6s ease-out;
+        }
+        .buoy-status-big.deploying { 
             color: var(--purple); 
             border-color: var(--purple); 
             background: rgba(175, 82, 222, 0.12); 
             box-shadow: 0 0 20px var(--purple-glow); 
-        }
-        .buoy-status-big.deploying { 
-            color: var(--warning); 
-            border-color: var(--warning); 
-            background: rgba(255, 149, 0, 0.12); 
-            box-shadow: 0 0 20px var(--warning-glow); 
-            animation: pulse-glow 2s infinite; 
+            animation: pulse-glow 2s infinite;
         }
         .buoy-status-big.deployed { 
             color: var(--success); 
             border-color: var(--success); 
             background: rgba(52, 199, 89, 0.12); 
-            box-shadow: 0 0 20px var(--success-glow); 
+            box-shadow: 0 0 20px var(--success-glow);
+            animation: statusFadeIn 0.6s ease-out;
         }
         .buoy-status-big.override { 
             color: var(--warning); 
@@ -517,8 +654,19 @@
         }
         
         @keyframes pulse-glow { 
-            0%, 100% { box-shadow: 0 0 20px var(--warning-glow); } 
-            50% { box-shadow: 0 0 30px var(--warning-glow), 0 0 45px var(--warning-glow); } 
+            0%, 100% { 
+                box-shadow: 0 0 20px var(--warning-glow); 
+                transform: scale(1);
+            } 
+            50% { 
+                box-shadow: 0 0 30px var(--warning-glow), 0 0 45px var(--warning-glow);
+                transform: scale(1.02);
+            } 
+        }
+        
+        @keyframes statusFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
         
         .event-type-big {
@@ -528,7 +676,7 @@
             letter-spacing: -0.04em; 
             line-height: 1; 
             margin-bottom: 20px; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             color: currentColor;
         }
         }
@@ -674,6 +822,10 @@
         <div class="alert-banner-text" id="alertText"></div>
         <button class="dismiss-button" id="dismissButton" onclick="dismissAlert()">Acknowledge</button>
     </div>
+    
+    <button class="maintenance-button" id="maintenanceButton" onclick="sendMaintenance()">
+        🔧 Send Maintenance
+    </button>
 
     <script>
         const CHANNEL_ID = '3203006', READ_API_KEY = 'JN2TR7S7XJLS9TWW', REFRESH_INTERVAL = 15000;
@@ -687,6 +839,8 @@
         let lastDriftEventCount = -1; // Track last drift event count
         let countdownSeconds = 15; // Countdown from 15 seconds
         let lastFetchTime = Date.now(); // Track when last fetch happened
+        let alertMode = false; // Track if system is in alert mode (impact/drift/offline)
+        let alertModeType = ''; // Track type of alert (impact, drift, offline)
         
         const ctx = document.getElementById('magnitudeChart').getContext('2d');
         const magnitudeData = [], maxDataPoints = 20;
@@ -711,11 +865,26 @@
             document.getElementById('alertText').textContent = text;
             banner.className = 'alert-banner show alert-' + type;
             
-            // Make impact, drift, and offline alerts persistent with dismiss button
+            // Make impact, drift, offline, and receiver offline alerts persistent with dismiss button
             if ((type === 'impact' && (title.includes('IMPACT DETECTED') || title.includes('OFFLINE'))) || 
                 (type === 'drift' && title.includes('DRIFT DETECTED'))) {
                 impactAlertActive = true;
                 document.getElementById('dismissButton').style.display = 'block';
+                
+                // Activate alert mode
+                alertMode = true;
+                if (title.includes('DRIFT')) {
+                    alertModeType = 'drift';
+                    document.body.classList.add('alert-mode', 'drift-alert');
+                } else {
+                    alertModeType = 'impact';
+                    document.body.classList.add('alert-mode');
+                    document.body.classList.remove('drift-alert');
+                }
+                
+                // Show maintenance button
+                document.getElementById('maintenanceButton').classList.add('show');
+                
                 // Don't auto-hide critical alerts
             } else {
                 document.getElementById('dismissButton').style.display = 'none';
@@ -731,6 +900,20 @@
             const banner = document.getElementById('alertBanner');
             banner.classList.remove('show');
             impactAlertActive = false;
+        }
+        
+        function sendMaintenance() {
+            // Exit alert mode
+            alertMode = false;
+            alertModeType = '';
+            document.body.classList.remove('alert-mode', 'drift-alert');
+            document.getElementById('maintenanceButton').classList.remove('show');
+            
+            // Also dismiss the alert banner
+            dismissAlert();
+            
+            // Show confirmation
+            showAlert('✅ MAINTENANCE SENT', 'System returned to normal monitoring mode', 'drift');
         }
         
         function updateCountdown() {
@@ -894,8 +1077,8 @@
                 document.getElementById('eventCount').textContent = eventCount;
                 
                 const buoyStatusEl = document.getElementById('buoyStatus');
-                if (buoyStatusCode === 1) buoyStatusEl.innerHTML = '<span class="badge badge-purple">STANDBY</span>';
-                else if (buoyStatusCode === 2) buoyStatusEl.innerHTML = '<span class="badge badge-warning">DEPLOYING</span>';
+                if (buoyStatusCode === 1) buoyStatusEl.innerHTML = '<span class="badge badge-blue">STANDBY</span>';
+                else if (buoyStatusCode === 2) buoyStatusEl.innerHTML = '<span class="badge badge-purple">DEPLOYING</span>';
                 else if (buoyStatusCode === 3) buoyStatusEl.innerHTML = '<span class="badge badge-success">DEPLOYED</span>';
                 else if (buoyStatusCode === 4) buoyStatusEl.innerHTML = '<span class="badge badge-warning">OVERRIDE</span>';
                 else if (buoyStatusCode === 5) buoyStatusEl.innerHTML = '<span class="badge badge-success">RECEIVER ACTIVE</span>';
